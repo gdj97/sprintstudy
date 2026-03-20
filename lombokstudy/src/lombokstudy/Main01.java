@@ -14,10 +14,14 @@ package lombokstudy;
  *      
  */
 public class Main01 {
-
 	public static void main(String[] args) {
-		// TODO Auto-generated method stub
-
+		Ex01_User user = new Ex01_User();
+		user.setId("hong");
+		user.setPw("1234");
+		System.out.println(user);
+		System.out.println(user.getId());
+		System.out.println(user.getPw());
+		Ex01_User user2 = new Ex01_User("kim","5678");
+		System.out.println(user2);
 	}
-
 }
