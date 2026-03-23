@@ -1,0 +1,17 @@
+[ACA] getArticleAndReadCnt(1) 메서드 호출 전
+[LA]Before 메서드 실행 전 실행
+getArticleAndReadCnt(1) 호출
+[LA]AfterReturning 메서드 정상 종료 후 실행. 리턴값=annotation.Article@3e62d773
+[LA] After 메서드 종료 후 실행
+[ACA] getArticleAndReadCnt(1) 메서드 호출 후
+[ACA] cache에 Article[1] 추가함
+annotation.Article@3e62d773
+[ACA] getArticleAndReadCnt(1) 메서드 호출 전
+[ACA] cache 에서 Article[1] 가져옴
+[main] a1==a2 : true
+[ACA] getArticleAndReadCnt(0) 메서드 호출 전
+[LA]Before 메서드 실행 전 실행
+getArticleAndReadCnt(0) 호출
+[LA] AfterThrowing 메서드 예외 종료 후 실행. 예외메세지=id는 0이안됨
+[LA] After 메서드 종료 후 실행
+[main] id는 0이안됨

@@ -1,0 +1,16 @@
+[LA]Before 메서드 실행 전 실행
+getArticleAndReadCnt(1) 호출
+[LA]AfterReturning 메서드 정상 종료 후 실행. 리턴값=annotation.Article@16612a51
+[LA] After 메서드 종료 후 실행
+
+[LA]Before 메서드 실행 전 실행
+getArticleAndReadCnt(1) 호출
+[LA]AfterReturning 메서드 정상 종료 후 실행. 리턴값=annotation.Article@54e041a4
+[LA] After 메서드 종료 후 실행
+[main] a1==a2 : false
+
+[LA]Before 메서드 실행 전 실행
+getArticleAndReadCnt(0) 호출
+[LA] AfterThrowing 메서드 예외 종료 후 실행. 예외메세지=id는 0이안됨
+[LA] After 메서드 종료 후 실행
+[main] id는 0이안됨
