@@ -84,7 +84,19 @@
     <artifactId>jstl</artifactId>
     <version>1.2</version>
 </dependency>
-    
+
+<!-- sitemesh 관련 jar -->
+<dependency>
+    <groupId>org.sitemesh</groupId>
+    <artifactId>sitemesh</artifactId>
+    <version>3.1.1</version>
+</dependency>
+<!-- Connection Pool 관련 설정-->    
+<dependency>
+    <groupId>com.mchange</groupId>
+    <artifactId>c3p0</artifactId>
+    <version>0.9.5.5</version>
+</dependency>
   </dependencies>
   <build>
     <finalName>shop1</finalName>

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration PUBLIC "-//mybatis.org/DTD config 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-config.dtd">
+<!--  /src/main/resources/mybatis-config.xml -->
+<configuration>
+  <settings>
+  	<setting name="jdbcTypeForNull" value="VARCHAR"/>
+  </settings>	
+  <!--  sql 구문을 가진 파일 목록 -->
+  <mappers>
+  	<package name="dao.mapper"/> <!-- mapper 패키지의 인터페이스파일을 sql구문으로 등록 -->
+  </mappers>
+</configuration>
