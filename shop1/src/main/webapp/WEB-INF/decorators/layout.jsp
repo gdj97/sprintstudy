@@ -29,7 +29,7 @@
 
 <div class="jumbotron text-center" style="margin-bottom:0">
   <h1>클라우드 활용 자바 스프링 개발 부트캠프</h1>
-  <p>Resize this responsive page to see the effect!</p> 
+  <p>구디아카데미 GDJ97</p> 
 </div>
 
 <nav class="navbar navbar-expand-sm bg-dark navbar-dark">
