@@ -1,9 +1,13 @@
 package config;
 
+import java.util.Properties;
+
+import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
+import org.springframework.context.support.ResourceBundleMessageSource;
 import org.springframework.web.multipart.MultipartResolver;
 import org.springframework.web.multipart.commons.CommonsMultipartResolver;
 import org.springframework.web.servlet.HandlerMapping;
@@ -11,6 +15,7 @@ import org.springframework.web.servlet.ViewResolver;
 import org.springframework.web.servlet.config.annotation.DefaultServletHandlerConfigurer;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import org.springframework.web.servlet.handler.SimpleMappingExceptionResolver;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
 
@@ -46,5 +51,24 @@ public class MvcConfig implements WebMvcConfigurer{
 		mr.setMaxUploadSize(1024 * 10240);
 		return mr;
 	}
-	
+	//예외처리 객체 : 예외발생시 예외 처리해 주는 객체
+	@Bean
+	public SimpleMappingExceptionResolver exceptionHandler() {
+		SimpleMappingExceptionResolver ser = new SimpleMappingExceptionResolver();
+		Properties pr = new Properties(); //Hashtable의 하위클래스
+		/*
+		 * exception.CartException 예외가 발생하면,/WEB-INF/view/exception.jsp를 호출
+		 */
+		pr.put("exception.CartException", "exception");
+		ser.setExceptionMappings(pr);
+		return ser;
+	}
+	//메세지를 코드값으로 처리하기 위한 설정
+	@Bean
+	public MessageSource messageSource() {
+		ResourceBundleMessageSource ms = new ResourceBundleMessageSource();
+		ms.setBasename("messages"); //messages.prperties 파일사용
+		ms.setDefaultEncoding("UTF-8");
+		return ms;
+	}
 }

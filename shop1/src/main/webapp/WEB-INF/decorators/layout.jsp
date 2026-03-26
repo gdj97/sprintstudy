@@ -33,11 +33,11 @@
 </div>
 
 <nav class="navbar navbar-expand-sm bg-dark navbar-dark">
-  <a class="navbar-brand" href="#">Navbar</a>
+  <a class="navbar-brand" href="${path}">Home</a>
   <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#collapsibleNavbar">
     <span class="navbar-toggler-icon"></span>
   </button>
-  <div class="collapse navbar-collapse" id="collapsibleNavbar">
+  <div class="collapse navbar-collapse d-flex justify-content-between" id="collapsibleNavbar">
     <ul class="navbar-nav">
       <li class="nav-item">
         <a class="nav-link" href="${path}/user/mypage?userid=${loginUser.userid}">회원관리</a>
@@ -55,32 +55,50 @@
         <a class="nav-link" href="${path}/board/list?boardid=3">QNA</a>
       </li>    
     </ul>
+    <ul class="navbar-nav">
+  	  <c:if test="${empty sessionScope.loginUser}">
+        <li class="nav-item">
+	 		<a class="nav-link" href="${path}/user/login">로그인</a>
+ 		</li>
+        <li class="nav-item">
+	 		<a class="nav-link" href="${path}/user/join">회원가입</a>
+ 		</li>
+	  </c:if>   
+	  <c:if test="${!empty sessionScope.loginUser}">
+        <li class="nav-item">
+			<span class="nav-link">${sessionScope.loginUser.username}님이 로그인 하셨습니다.</span>
+        </li>
+        <li class="nav-item">
+	 		<a href="${path}/user/logout" class="nav-link">로그아웃</a>
+        </li>
+	  </c:if>   
+    </ul>
   </div>  
 </nav>
 
-<div class="container" style="margin-top:30px">
+<div class="container-fluid px-5" style="margin-top:30px">
   <div class="row">
     <div class="col-sm-4">
+      <ul class="nav nav-pills flex-column">
+        <li class="nav-item">
+			<c:if test="${empty sessionScope.loginUser}">
+	 		<a class="nav-link" href="${path}/user/login">로그인</a>
+	 		<a class="nav-link" href="${path}/user/join">회원가입</a>
+			</c:if>   
+			<c:if test="${!empty sessionScope.loginUser}">
+			${sessionScope.loginUser.username}님이 로그인 하셨습니다.&nbsp;&nbsp;
+	 		<a href="${path}/user/logout">로그아웃</a>
+			</c:if>   
+        </li>
+      </ul>
+      <hr>
       <h2>About Me</h2>
       <h5>Photo of me:</h5>
       <div class="fakeimg">Fake Image</div>
       <p>Some text about me in culpa qui officia deserunt mollit anim..</p>
       <h3>Some Links</h3>
       <p>Lorem ipsum dolor sit ame.</p>
-      <ul class="nav nav-pills flex-column">
-        <li class="nav-item">
-          <a class="nav-link active" href="#">Active</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="#">Link</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="#">Link</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link disabled" href="#">Disabled</a>
-        </li>
-      </ul>
+      
       <hr class="d-sm-none">
     </div>
     <div class="col-sm-8">

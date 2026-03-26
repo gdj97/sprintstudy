@@ -51,6 +51,9 @@ public class CartController {
 		model.addAttribute("cart", cart);
 		return "cart/cart";
 	}
+	/*
+	 * CartAspect.cartCheck()의 대상이 되는 메서드
+	 */
 	@RequestMapping("checkout")
 	public String checkout(HttpSession session) {
 		return null;  // cart/checkout.jsp 요청
