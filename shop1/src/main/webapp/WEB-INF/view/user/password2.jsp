@@ -14,7 +14,7 @@
 <h2>비밀번호 변경</h2>
 <form:form modelAttribute="userPassword" method="post" action="password2" 
 	onsubmit="return inchk(this)" name="f">
- <spring:hasBindErrors name="user">
+ <spring:hasBindErrors name="userPassword">
     <font color="red">
       <c:forEach items="${errors.globalErrors}" var="error">
         <spring:message code="${error.code}" /><br>
@@ -24,13 +24,13 @@
 
 <table class="table"><tr><th>현재 비밀번호</th>
      <td><form:password path="password" class="form-control" />
-         <form:errors path="password" /></td></tr>
+         <font color="red"><form:errors path="password" /></font></td></tr>
   <tr><th>변경 비밀번호</th>
       <td><form:password path="chgpass" class="form-control" />
-      <form:errors path="chgpass" /></td></tr>
+      <font color="red"><form:errors path="chgpass" /></font></td></tr>
   <tr><th>변경 비밀번호 재입력</th>
       <td><form:password path="chgpass2" class="form-control" />
-      <form:errors path="chgpass2" /></td></tr>
+      <font color="red"><form:errors path="chgpass2" /></font></td></tr>
   <tr><td colspan="2" class="text-center">
   	<button class="btn btn-primary">비밀번호변경</button></td></tr>
 </table>
