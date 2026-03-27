@@ -51,6 +51,7 @@ public class MvcConfig implements WebMvcConfigurer{
 		mr.setMaxUploadSize(1024 * 10240);
 		return mr;
 	}
+	
 	//예외처리 객체 : 예외발생시 예외 처리해 주는 객체
 	@Bean
 	public SimpleMappingExceptionResolver exceptionHandler() {
@@ -60,9 +61,12 @@ public class MvcConfig implements WebMvcConfigurer{
 		 * exception.CartException 예외가 발생하면,/WEB-INF/view/exception.jsp를 호출
 		 */
 		pr.put("exception.CartException", "exception");
+		pr.put("exception.LoginException", "exception");
+		pr.put("exception.ShopException", "exception");
 		ser.setExceptionMappings(pr);
 		return ser;
 	}
+	
 	//메세지를 코드값으로 처리하기 위한 설정
 	@Bean
 	public MessageSource messageSource() {

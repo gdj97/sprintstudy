@@ -20,13 +20,13 @@
    <tr><td>생년월일</td>
    <td><fmt:formatDate value="${user.birthday}" pattern="yyyy-MM-dd"/></td></tr>   
  </table><br>
- <a href="logout">[로그아웃]</a>&nbsp;
- <a href="update?userid=${user.userid}">[회원정보수정]</a>&nbsp;
- <a href="password">[비밀번호수정]</a>&nbsp;
+ <a href="logout" class="btn btn-secondary">로그아웃</a>&nbsp;
+ <a href="update?userid=${user.userid}" class="btn btn-primary">회원정보수정</a>&nbsp;
+ <a href="password" class="btn btn-primary">비밀번호수정</a>&nbsp;
  <c:if test="${loginUser.userid != 'admin'}">
- <a href="delete?userid=${user.userid}">[회원탈퇴]</a>&nbsp;
+ <a href="delete?userid=${user.userid}" class="btn btn-danger">회원탈퇴</a>&nbsp;
  </c:if>
  <c:if test="${loginUser.userid == 'admin'}">
- <a href="../admin/list">[회원목록]</a>&nbsp;
+ <a href="../admin/list" class="btn btn-success">회원목록</a>&nbsp;
  </c:if> 
  </div></body></html>

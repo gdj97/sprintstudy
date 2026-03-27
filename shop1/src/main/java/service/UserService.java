@@ -1,6 +1,8 @@
 package service;
 
 
+import javax.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -18,5 +20,13 @@ public class UserService {
 
 	public User getUser(String userid) {
 		return dao.selectOne(userid);
+	}
+
+	public void userUpdate(User user) {
+		dao.update(user);
+	}
+
+	public void userDelete(String userid) {
+		dao.delete(userid);
 	}
 }
