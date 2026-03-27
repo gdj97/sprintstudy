@@ -4,7 +4,7 @@
 <%@ taglib prefix="form" uri="http://www.springframework.org/tags/form"%>
 <%@ taglib prefix="spring" uri="http://www.springframework.org/tags"%>
     
-<%-- /WEB-INF/view/user/password.jsp --%>    
+<%-- /WEB-INF/view/user/password2.jsp --%>    
 <!DOCTYPE html>
 <html><head>
 <meta charset="UTF-8">
@@ -12,7 +12,7 @@
 </head>
 <body>
 <h2>비밀번호 변경</h2>
-<form:form modelAttribute="userPassword" method="post" action="password" 
+<form:form modelAttribute="userPassword" method="post" action="password2" 
 	onsubmit="return inchk(this)" name="f">
  <spring:hasBindErrors name="user">
     <font color="red">
