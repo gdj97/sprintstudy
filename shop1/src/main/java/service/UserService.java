@@ -29,4 +29,8 @@ public class UserService {
 	public void userDelete(String userid) {
 		dao.delete(userid);
 	}
+
+	public void userChgPass(String userid, String chgpass) {
+		dao.chgPass(userid,chgpass);
+	}
 }

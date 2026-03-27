@@ -36,4 +36,5 @@ public class User {
 	@Past(message="생일은 과거 날짜만 가능합니다.")
 	@DateTimeFormat(pattern="yyyy-MM-dd") //날짜의 형식 지정
 	private Date birthday;
+
 }

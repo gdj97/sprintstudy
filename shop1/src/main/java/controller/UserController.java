@@ -8,6 +8,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.ModelAndView;
@@ -185,5 +186,63 @@ public class UserController {
 			session.invalidate();
 			return "redirect:login";
 		}
+	}
+	/*
+	 * 비밀번호 변경 화면 출력
+	 * 1. login 검증 => AOP 클래스
+	 *    LoginAspect.loginCheck()
+	 *     => pointcut : UserController 클래스에서 메서드이름이 loginCheck로 시작하고, 매개변수의 마지막이 HttpSession인
+	 *                   메서드로 설정
+	 *        advice : Around           
+	 */
+	@GetMapping("password")
+	public String loginCheckForm(HttpSession session) {
+		return null;
+	}
+	/*
+	 * 1. login 검증 => AOP 클래스
+	 * 2. 현재비밀번호와 입력비밀번호 비교
+	 *    일치 : db 수정. 로그인정보 수정. mypage로 페이지 이동
+	 *    불일치 : 오류메세지 출력. password 페이지 이동
+	 */
+	@PostMapping("password")
+	public String loginCheckPassword(String password, String chgpass,HttpSession session) {
+		User loginUser = (User)session.getAttribute("loginUser");
+		if(!password.equals(loginUser.getPassword())) {
+			throw new ShopException("비밀번호 오류입니다.","password");
+		}
+		try {
+			service.userChgPass(loginUser.getUserid(),chgpass);
+			loginUser.setPassword(chgpass);
+		} catch(Exception e) {  //db 수정시 오류 발생
+			e.printStackTrace();
+			throw new ShopException("비밀번호 변경시 db 오류입니다.","password");
+		}
+		return "redirect:mypage?userid=" + loginUser.getUserid();
+	}
+	/*
+	 * @PathVariable : {url} 값을 매개변수로 전달. url에 해당하는 값을  String url 매개변수로 전달
+	 *   idsearch 요청 : url=id
+	 *   pwsearch 요청 : url=pw
+	 */
+	@PostMapping("{url}search")
+	public ModelAndView search(User user, BindingResult bresult, @PathVariable String url) {
+		ModelAndView mav = new ModelAndView();
+		if(url.equals("pw")) {
+			if(user.getUserid() == null || user.getUserid().trim().equals("")) {
+				bresult.rejectValue("userid", "error.required");
+			}
+		}
+		if(user.getEmail() == null || user.getEmail().trim().equals("")) {
+			bresult.rejectValue("email", "error.required");
+		}
+		if(user.getPhoneno() == null || user.getPhoneno().trim().equals("")) {
+			bresult.rejectValue("phoneno", "error.required");
+		}
+		if(bresult.hasErrors()) {
+			bresult.reject("error.input.check");
+			return mav;
+		}
+		return mav;
 	}	
 }

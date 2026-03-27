@@ -2,6 +2,7 @@ package dao.mapper;
 
 import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Insert;
+import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
 
@@ -23,4 +24,6 @@ public interface UserMapper {
 	@Delete("delete from useraccount where userid=#{value}")
 	void delete(String userid);
 
+	@Update("update useraccount set password=#{chgpass} where userid=#{userid}")
+	void chgPass(@Param("userid") String userid, @Param("chgpass") String chgpass);
 }

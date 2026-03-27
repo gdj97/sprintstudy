@@ -32,4 +32,8 @@ public class UserDao {
 	public void delete(String userid) {
 		template.getMapper(cls).delete(userid);
 	}
+
+	public void chgPass(String userid, String chgpass) {
+		template.getMapper(cls).chgPass(userid,chgpass);
+	}
 }

@@ -23,6 +23,7 @@
  <a href="logout" class="btn btn-secondary">로그아웃</a>&nbsp;
  <a href="update?userid=${user.userid}" class="btn btn-primary">회원정보수정</a>&nbsp;
  <a href="password" class="btn btn-primary">비밀번호수정</a>&nbsp;
+ <a href="password2" class="btn btn-primary">비밀번호수정2</a>&nbsp;
  <c:if test="${loginUser.userid != 'admin'}">
  <a href="delete?userid=${user.userid}" class="btn btn-danger">회원탈퇴</a>&nbsp;
  </c:if>

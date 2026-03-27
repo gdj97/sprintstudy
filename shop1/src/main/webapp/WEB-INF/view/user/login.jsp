@@ -32,5 +32,4 @@ function win_open(page) {
 	   open(page ,"",op);
 }
 </script>
-
 </body></html>
