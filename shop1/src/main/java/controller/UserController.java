@@ -18,6 +18,7 @@ import dto.User;
 import dto.UserPassword;
 import exception.ShopException;
 import service.UserService;
+import util.ShopUtil;
 
 
 @Controller
@@ -231,9 +232,9 @@ public class UserController {
 	@PostMapping("{url}search") // xxsearch 요청시 호출되는 메서드(idsearch, pwsearch 요청)
 	public ModelAndView search(User user, BindingResult bresult, @PathVariable String url) {
 		ModelAndView mav = new ModelAndView();
-		String code = "error.userid.search";
+		String code = "error.userid.search"; //아이디를 찾을 수 없습니다.
 		if(url.equals("pw")) { //pwsearch 요청인 경우
-			code = "error.password.search";
+			code = "error.password.search"; //비밀번호를 찾을 수 없습니다.
 			if(user.getUserid() == null || user.getUserid().trim().equals("")) {
 				bresult.rejectValue("userid", "error.required");
 			}
@@ -249,15 +250,20 @@ public class UserController {
 			return mav;
 		}
 		//입력값이 정상인 경우
-		String result = service.getSearch(user);
-		
-		if(result==null) {
+		//result : db에서 조회한 아이디값 또는 비밀번호값
+		String result = service.getSearch(user,url);
+		if(result==null) { //아이디 또는 비밀번호를 찾지 못함
 			bresult.reject(code);
 			return mav;
 		}
+		//비밀번호 검색인 경우 비밀번호를 임의의 문자로 변경
+		if(url.equals("pw")) {
+			result = ShopUtil.getRandomString(6, false, true);
+			service.userChgPass(user.getUserid(), result); //비밀번호 변경
+		}
 		mav.addObject("result",result);
 		mav.addObject("title",((url.equals("pw")?"비밀번호":"아이디")));
-		mav.setViewName("search");
+		mav.setViewName("search"); //뷰이름. /WEB-INF/view/search.jsp 페이지 선택
 		return mav;
 	}	
 	//==================================

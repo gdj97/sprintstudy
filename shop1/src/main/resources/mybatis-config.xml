@@ -5,6 +5,7 @@
 <configuration>
   <settings>
   	<setting name="jdbcTypeForNull" value="VARCHAR"/>
+  	<setting name="logImpl" value="SLF4J"/>
   </settings>	
   <!--  sql 구문을 가진 파일 목록 -->
   <mappers>

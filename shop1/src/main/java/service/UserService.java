@@ -1,6 +1,8 @@
 package service;
 
 
+import java.util.List;
+
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,4 +35,17 @@ public class UserService {
 	public void userChgPass(String userid, String chgpass) {
 		dao.chgPass(userid,chgpass);
 	}
+
+	public String getSearch(User user, String url) {
+		return dao.search(user,url);
+	}
+
+	public List<User> userList() {
+		return dao.list();
+	}
+
+	public List<User> getUserList(String[] idchks) {
+		return dao.list(idchks);  //오버로딩된 메서드
+	}
+	
 }

@@ -1,6 +1,7 @@
 package dao;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.mybatis.spring.SqlSessionTemplate;
@@ -35,5 +36,26 @@ public class UserDao {
 
 	public void chgPass(String userid, String chgpass) {
 		template.getMapper(cls).chgPass(userid,chgpass);
+	}
+
+	public String search(User user, String url) {
+		String col = url.equals("pw")?"password":"userid";
+		param.clear();
+		param.put("col", col); //컬럼명
+		param.put("userid", user.getUserid());
+		param.put("email", user.getEmail());
+		param.put("phoneno", user.getPhoneno());
+		return template.getMapper(cls).search(param);
+	}
+
+	public List<User> list() {
+		param.clear();
+		return template.getMapper(cls).selectList(param);
+	}
+
+	public List<User> list(String[] idchks) {
+		param.clear();
+		param.put("userids", idchks);
+		return template.getMapper(cls).selectList(param);
 	}
 }

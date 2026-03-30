@@ -1,5 +1,8 @@
 package dao.mapper;
 
+import java.util.List;
+import java.util.Map;
+
 import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Param;
@@ -26,4 +29,19 @@ public interface UserMapper {
 
 	@Update("update useraccount set password=#{chgpass} where userid=#{userid}")
 	void chgPass(@Param("userid") String userid, @Param("chgpass") String chgpass);
+
+	@Select({"<script>",
+		     "select ${col} from useraccount where email=#{email} and phoneno=#{phoneno} ",
+		     "<if test='userid != null'>and userid=#{userid}</if>",
+			 "</script>"})
+	String search(Map<String, Object> param);
+//userids = [test1] 아이디 조회
+//select * from useraccount where userid in ('test1')
+	@Select({"<script>",
+		  "select * from useraccount ",
+		  "<if test='userids != null'> where userid in "
+        + "<foreach collection='userids' item='id' separator=',' "
+        + " open='(' close=')'>#{id}</foreach></if>",
+		  "</script>"})
+	List<User> selectList(Map<String, Object> param);
 }

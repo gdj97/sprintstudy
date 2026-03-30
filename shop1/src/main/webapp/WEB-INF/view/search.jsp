@@ -14,8 +14,9 @@
 </table>
 <script type="text/javascript">
    function sendclose() {
+	   // opener : login 화면
 	   opener.document.loginform.userid.value='${result}';
-	   self.close();
+	   self.close(); //현재페이지 닫기
    }
 </script>
 </body></html>
