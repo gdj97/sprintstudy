@@ -6,6 +6,7 @@ import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.ModelAndView;
 
 import dto.User;
+import dto.UserPassword;
 import exception.ShopException;
 import service.UserService;
 
@@ -195,8 +197,9 @@ public class UserController {
 	 *                   메서드로 설정
 	 *        advice : Around           
 	 */
-	@GetMapping("password")
-	public String loginCheckForm(HttpSession session) {
+	@GetMapping({"password","password2"})
+	public String loginCheckForm(HttpSession session,Model model) {
+		model.addAttribute(new UserPassword());
 		return null;
 	}
 	/*
@@ -225,10 +228,12 @@ public class UserController {
 	 *   idsearch 요청 : url=id
 	 *   pwsearch 요청 : url=pw
 	 */
-	@PostMapping("{url}search")
+	@PostMapping("{url}search") // xxsearch 요청시 호출되는 메서드(idsearch, pwsearch 요청)
 	public ModelAndView search(User user, BindingResult bresult, @PathVariable String url) {
 		ModelAndView mav = new ModelAndView();
-		if(url.equals("pw")) {
+		String code = "error.userid.search";
+		if(url.equals("pw")) { //pwsearch 요청인 경우
+			code = "error.password.search";
 			if(user.getUserid() == null || user.getUserid().trim().equals("")) {
 				bresult.rejectValue("userid", "error.required");
 			}
@@ -243,6 +248,51 @@ public class UserController {
 			bresult.reject("error.input.check");
 			return mav;
 		}
+		//입력값이 정상인 경우
+		String result = service.getSearch(user);
+		
+		if(result==null) {
+			bresult.reject(code);
+			return mav;
+		}
+		mav.addObject("result",result);
+		mav.addObject("title",((url.equals("pw")?"비밀번호":"아이디")));
+		mav.setViewName("search");
 		return mav;
 	}	
+	//==================================
+	@PostMapping("password2")
+	public String loginCheckPassword2(UserPassword userpass,BindingResult bresult,HttpSession session) {
+		if(userpass.getPassword() == null || userpass.getPassword().trim().equals("")) {
+			bresult.rejectValue("password", "error.required");
+		}
+		if(userpass.getChgpass() == null || userpass.getChgpass().trim().equals("")) {
+			bresult.rejectValue("chgpass", "error.required");
+		}
+		if(userpass.getChgpass2() == null || userpass.getChgpass2().trim().equals("")) {
+			bresult.rejectValue("chgpass2", "error.required");
+		}
+		if(bresult.hasErrors()) {
+			bresult.reject("error.input.check"); //global 오류등록
+			return null;
+		}
+		//변경비밀번호와 변경비밀번호 재입력값이 같은지 검증
+		if(!userpass.getChgpass().equals(userpass.getChgpass2())) {
+			bresult.reject("error.password.equals");
+			return null;
+		}
+		User loginUser = (User)session.getAttribute("loginUser");
+		if(!userpass.getPassword().equals(loginUser.getPassword())) {
+			throw new ShopException("비밀번호 오류입니다.","password2");
+		}
+		try {
+			service.userChgPass(loginUser.getUserid(),userpass.getChgpass()); //비밀번호를 db에서 변경
+			loginUser.setPassword(userpass.getChgpass());   //세션정보의 비밀번호 변경
+		} catch(Exception e) {  //db 수정시 오류 발생
+			e.printStackTrace();
+			throw new ShopException("비밀번호 변경시 db 오류입니다.","password2");
+		}
+		return "redirect:mypage?userid=" + loginUser.getUserid();
+	}
+	
 }

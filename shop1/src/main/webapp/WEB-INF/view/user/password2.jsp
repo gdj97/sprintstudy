@@ -12,8 +12,8 @@
 </head>
 <body>
 <h2>비밀번호 변경</h2>
-<form:form modelAttribute="userPassword" method="post" action="password2" 
-	onsubmit="return inchk(this)" name="f">
+<form:form modelAttribute="userPassword" method="post" action="password2" name="f">
+<%-- global 오류  --%>
  <spring:hasBindErrors name="userPassword">
     <font color="red">
       <c:forEach items="${errors.globalErrors}" var="error">
