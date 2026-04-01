@@ -49,13 +49,12 @@ public class UserDao {
 	}
 
 	public List<User> list() {
-		param.clear();
-		return template.getMapper(cls).selectList(param);
+		return template.getMapper(cls).selectList(null); //모든 사용자데이터 리턴
 	}
 
 	public List<User> list(String[] idchks) {
 		param.clear();
 		param.put("userids", idchks);
-		return template.getMapper(cls).selectList(param);
+		return template.getMapper(cls).selectList(param); //idchks 값에 저장된 userid값만 목록으로 리턴
 	}
 }

@@ -60,6 +60,7 @@ public class AdminController {
 	}
 	/*
 	 * String[] idchks : 화면에서 전송된 idchks 파라미터가 여러개인 경우. request.getParameterValues(파라미터이름)
+	 * idchks : 사용자아이디값들 저장
 	 */
 	@PostMapping("mailform")
 	public String mailform(String[] idchks, Model model) {
@@ -74,7 +75,7 @@ public class AdminController {
 			recipient.append(u.getUsername())  //테스트1<test1@aaa.bbb>,테스트2<test2@aaa.bbb>,
 			         .append("<").append(u.getEmail()).append(">,");
 		}
-		mail.setRecipient(recipient.toString());
+		mail.setRecipient(recipient.toString()); //수신자 정보
 		mail.setGoogleid(""); //본인의 구글 id
 		mail.setGooglepw(""); //본인의 앱비밀번호
 		model.addAttribute("mail",mail);
@@ -83,8 +84,10 @@ public class AdminController {
 	   /*
 	    * 구글 smtp 서버를 이용하여 메일 전송하기
 	    * 1. 구글계정에접속하여 2단계 인증 설정하기
-	    * 2. 앱비밀번호 생성하기 :
-	    * 3. 생성된 앱비밀번호를 메모장을 이용하여 저장하기
+	    *     Google 계정관리 > 보안 및 로그인 > 2단계인증
+	    * 2. 앱비밀번호 생성하기 
+	    *     Google 계정관리 > Google 계정 검색 > 앱 비밀번호 검색 
+	    * 3. 생성된 앱비밀번호를 메모장을 이용하여 저장하기 : momzgzwhcosuomnu
 	    * 4. pom.xml에 mail 관련 설정 추가
 	    * 5. mail.properties 파일 /resources/ 폴더에 생성하기
 	    */
@@ -97,26 +100,34 @@ public class AdminController {
 		Properties prop = new Properties();
 		try {
 			String path = request.getServletContext().getRealPath("/") + "/WEB-INF/classes/mail.properties";
+			//fis : mail.properties 파일을 읽기 
 			FileInputStream fis = new FileInputStream(path);
-			prop.load(fis);
-			prop.put("mail.smtp.user", mail.getGoogleid());
+			prop.load(fis); //mail.properties 파일의 key=value 값으로 데이터 저장
+			prop.put("mail.smtp.user", mail.getGoogleid()); //구글아이디로 메일 전송
 		} catch(IOException e) {
 			e.printStackTrace();
 		}
+		//mail : 화면에서 입력한 데이터. 
+		//prop : 메일 전송을 위한 환경설정 데이터
 		if(mailSend(mail,prop)) {
 			model.addAttribute("message","메일 전송이 완료되었습니다.");
 		} else {
 			model.addAttribute("message","메일 전송을 실패했습니다.");
 		}
 		model.addAttribute("url","list");
-		return "alert";
+		return "alert";  // /WEB-INF/view/alert.jsp
 	}
 	private boolean mailSend(Mail mail, Properties prop) {
+		//Authenticator 객체 : 메일 인증 객체
 		MyAuthenticator auth = new MyAuthenticator(mail.getGoogleid(),mail.getGooglepw());
+		//session : 구글에서 메일전송을 할 수 있는 연결 객체. 
 		Session session = Session.getInstance(prop,auth);
+		//session 을 이용하여 메일객체 생성
 		MimeMessage mailmsg = new MimeMessage(session);
 		try {
+			//보내는 사람 설정
 			mailmsg.setFrom(new InternetAddress(mail.getGoogleid() + "@gmail.com"));
+			
 			List<InternetAddress> addrs = new ArrayList<InternetAddress>();
 			String[] emails = mail.getRecipient().split(",");
 			for(String email : emails) {
@@ -130,20 +141,24 @@ public class AdminController {
 			for(int i=0;i<addrs.size();i++) {
 				arr[i]=addrs.get(i);
 			}
+			//수신자 설정
 			mailmsg.setRecipients(Message.RecipientType.TO,arr);
-			mailmsg.setSentDate(new Date());
-			mailmsg.setSubject(mail.getTitle());
-			MimeMultipart multipart =new MimeMultipart();
-			MimeBodyPart message = new MimeBodyPart();
-			message.setContent(mail.getContents(),mail.getMtype());
-			multipart.addBodyPart(message);
+			//참조자 설정 : Message.RecipientType.CC
+            //mailmsg.setRecipients(Message.RecipientType.CC,arr);
+			mailmsg.setSentDate(new Date()); //보내는 일자
+			mailmsg.setSubject(mail.getTitle());  //입력된 제목
+			MimeMultipart multipart =new MimeMultipart();  //메일의 영역 : 내용, 첨부파일1,첨부파일2,...
+			MimeBodyPart message = new MimeBodyPart();  //메일영역 구간
+			message.setContent(mail.getContents(),mail.getMtype());  //내용 설정. 
+			multipart.addBodyPart(message); //내용을 메일 저장
 			for(MultipartFile mf : mail.getFile1()) {
+				//mf : 첨부된 파일 한개
 				if ((mf != null) && (!mf.isEmpty())) {
-					multipart.addBodyPart(bodyPart(mf));
+					multipart.addBodyPart(bodyPart(mf));  //첨부파일을 메일 저장
 				}
 			}
-			mailmsg.setContent(multipart);
-			Transport.send(mailmsg);
+			mailmsg.setContent(multipart); //내용+첨부파일1+첨부파일2 => 메일의 내용으로 설정
+			Transport.send(mailmsg);  //메일 전송
 			return true;
 		} catch(MessagingException me) {
 			me.printStackTrace();
@@ -151,15 +166,16 @@ public class AdminController {
 		return false;
 	}	
 	private BodyPart bodyPart(MultipartFile mf) {
+		//mf : 업로드된 파일의 내용
 		MimeBodyPart body = new MimeBodyPart();
 		String orgFile = mf.getOriginalFilename();
-		String path = "c:/mailupload/";
+		String path = "c:/mailupload/"; //서버로 파일을 업로드 필요
 		File f1 = new File(path);
 		if(!f1.exists()) f1.mkdirs();
-		File f2 = new File(path + orgFile);
+		File f2 = new File(path + orgFile);  //파일업로드폴더 + 파일이름
 		try {
-			mf.transferTo(f2);
-			body.attachFile(f2);
+			mf.transferTo(f2);  //f2 파일에 mf 데이터를 저장. 업로드완료
+			body.attachFile(f2); //메일에 파일을 추가. 첨부파일 설정
 			body.setFileName(new String(orgFile.getBytes("UTF-8"),"8859_1"));
 		} catch (Exception e) {
 			e.printStackTrace();
