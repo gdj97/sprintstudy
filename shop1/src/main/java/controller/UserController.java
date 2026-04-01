@@ -1,5 +1,7 @@
 package controller;
 
+import java.util.List;
+
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 
@@ -14,9 +16,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.ModelAndView;
 
+import dto.Sale;
 import dto.User;
 import dto.UserPassword;
 import exception.ShopException;
+import service.ItemService;
 import service.UserService;
 import util.ShopUtil;
 
@@ -26,6 +30,8 @@ import util.ShopUtil;
 public class UserController {
 	@Autowired
 	private UserService service;
+	@Autowired
+	private ItemService itemService;
 	
 	//http://localhost:8080/shop1/user/join => /WEB-INF/view/user/join.jsp 
 	@GetMapping("*") //Get 방식의 모든 요청
@@ -108,7 +114,10 @@ public class UserController {
 	public ModelAndView idCheckMypage(String userid,HttpSession session) {
 		ModelAndView mav = new ModelAndView();
 		User user = service.getUser(userid);
+		//salelist : 사용자가 주문한 주문데이터 정보 목록. //sale 테이블의 정보 + saleItem 테이블 정보 + item 테이블의 정보
+		List<Sale> salelist = itemService.saleList(userid);
 		mav.addObject("user", user);
+		mav.addObject("salelist",salelist);
 		return mav;
 	}	
 	//AOP 설정되도록 메서드의 선언부 구현 필요

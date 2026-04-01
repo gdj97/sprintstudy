@@ -6,10 +6,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.servlet.ModelAndView;
 
 import dto.Cart;
 import dto.Item;
 import dto.ItemSet;
+import dto.Sale;
+import dto.User;
 import service.ItemService;
 
 @Controller
@@ -58,4 +61,23 @@ public class CartController {
 	public String checkout(HttpSession session) {
 		return null;  // cart/checkout.jsp 요청
 	}
+	
+	/*
+	 * CartAspect.cartCheck()의 대상이 되는 메서드
+	 * 1. 로그인
+	 * 2. Cart 상품 존재
+	 * 3. 관리자는 거래 불가
+	 */
+	@RequestMapping("end")
+	public ModelAndView checkend(HttpSession session) {
+		ModelAndView mav = new ModelAndView();
+		Cart cart = (Cart)session.getAttribute("CART");           //장바구니 상품
+		User loginUser = (User)session.getAttribute("loginUser"); //로그인 정보
+		//sale,saleitem 테이블에 저장. Sale 객체 리턴
+		Sale sale = service.checkend(loginUser,cart);
+		session.removeAttribute("CART"); //장바구니 상품 제거
+		mav.addObject("sale",sale); //데이터 전송
+		return mav;
+	}
+	
 }

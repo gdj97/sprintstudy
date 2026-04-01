@@ -11,12 +11,23 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import dao.ItemDao;
+import dao.SaleDao;
+import dao.SaleItemDao;
+import dto.Cart;
 import dto.Item;
+import dto.ItemSet;
+import dto.Sale;
+import dto.SaleItem;
+import dto.User;
 //Service : Controller와 Repository(Model) 사이의 중간 역할
 @Service  //@Component + Service 기능. 
 public class ItemService {
 	@Autowired
 	private ItemDao itemDao;
+	@Autowired
+	private SaleDao saleDao;
+	@Autowired
+	private SaleItemDao saleItemDao;
 
 	public List<Item> itemList() {
 		return itemDao.list();
@@ -66,4 +77,35 @@ public class ItemService {
 		}
 	}
 
+	public Sale checkend(User loginUser, Cart cart) {
+	    int maxsaleid = saleDao.getMaxSaleId(); //saleid의 최대값
+	    Sale sale = new Sale();                 //Sale 객체 생성
+	    sale.setSaleid(maxsaleid+1);            //최대값 + 1
+	    sale.setUser(loginUser);                //로그인한 User 객체 정보
+	    sale.setUserid(loginUser.getUserid());  //로그인한 userid
+	    saleDao.insert(sale);                   //sale 테이블에 저장
+	    int seq = 0;
+	    for(ItemSet is : cart.getItemSetList()) {//주문상품
+	    	SaleItem saleItem = new SaleItem(sale.getSaleid(),++seq,is);
+	    	sale.getItemList().add(saleItem);
+	    	saleItemDao.insert(saleItem); //주문상품(saleitem)테이블에 저장
+	    }
+		return sale; //주문정보, 고객정보, 주문상품
+	}
+
+	public List<Sale> saleList(String userid) {
+		//[{saleid:1,userid:test1,..},{saleid:3,userid:test1,..}]
+		List<Sale> list = saleDao.list(userid); //userid가 주문한 sale 정보 목록
+		//list의 Sale 객체에 SaleItem 객체목록 저장
+		for(Sale sa : list) { //sa : {saleid:1,userid:test1,..}
+			//saleItemList : saleid에 해당하는 주문상품 목록
+			List<SaleItem> saleItemList = saleItemDao.list(sa.getSaleid()); //주문번호에 해당하는 주문상품 목록
+			for(SaleItem si : saleItemList) {
+				Item item = itemDao.selectOne(si.getItemid());  //주문상품의 상품정보
+				si.setItem(item); //상품정보
+			}
+			sa.setItemList(saleItemList);
+		}
+		return list;
+	}
 }

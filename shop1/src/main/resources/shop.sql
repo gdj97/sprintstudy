@@ -33,21 +33,33 @@ create table useraccount (
 select * from useraccount
 
 CREATE TABLE sale (  -- 주문정보
-	saleid int PRIMARY KEY,  
-	userid varchar(10) NOT NULL, 
-	saledate datetime,
-	foreign key (userid) references useraccount (userid)
+	saleid int PRIMARY KEY,      -- 주문 번호를 증가시키면서 key로 사용
+	userid varchar(10) NOT NULL, -- 사용자아이디
+	saledate datetime,           -- 주문일자  
+	foreign key (userid) references useraccount (userid)  -- 등록된 사용자만 주문 가능
 );
 
+select max(saleid) from sale
 CREATE TABLE saleitem (   -- 주문상품
-	saleid int ,
-	seq int ,
-	itemid int NOT NULL,
-	quantity int,
+	saleid int ,          -- 주문번호
+	seq int ,             -- 주문상품번호
+	itemid int NOT NULL,  -- 상품번호
+	quantity int,         -- 수량 
 	PRIMARY KEY (saleid, seq),
 	foreign key (saleid) references sale (saleid),
 	foreign key (itemid) references item (id)
 );
+
+-- 답변글 게시판
+num   grp   grplevel  grpstep
+ 2     2         0         1    => 2번 원글
+ 4     2         1         2    => 2번 답변글 
+ 1     1         0         1    => 1번 원글
+ 3     1         1         2    => 1번 답변글
+
+ -- 페이징처리
+ -- 한페이지에 10개의 게시물만 출력
+ -- 한페이지에 10개의 페이지번호만 출력
 
 create table board (
    num int primary key,   -- 게시글번호. 기본키

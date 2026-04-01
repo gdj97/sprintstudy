@@ -73,6 +73,7 @@
 	<version>2.0.6</version>
 </dependency>
 
+<!-- 로그 설정 -->
 <dependency>
     <groupId>ch.qos.logback</groupId>
     <artifactId>logback-classic</artifactId>
