@@ -67,7 +67,7 @@ create table board (
    pass varchar(20),      -- 비밀번호
    title varchar(100),    -- 글제목
    content varchar(2000), -- 글내용
-   file1 varchar(200),    -- 첨부파일명
+   file1 varchar(200),    -- 첨부파일명. 프로퍼티이름과 컬럼의 이름이 다름
    boardid varchar(2),    -- 게시판종류:1:공지사항,2:자유게시판,3:QNA
    regdate datetime,      -- 등록일시
    readcnt int(10),       -- 조회수. 상세보기 시 1씩증가
