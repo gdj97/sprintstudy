@@ -1,7 +1,26 @@
 package controller;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Properties;
 
+import javax.mail.Authenticator;
+import javax.mail.BodyPart;
+import javax.mail.Message;
+import javax.mail.MessagingException;
+import javax.mail.PasswordAuthentication;
+import javax.mail.Session;
+import javax.mail.Transport;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeBodyPart;
+import javax.mail.internet.MimeMessage;
+import javax.mail.internet.MimeMultipart;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 
@@ -14,6 +33,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
 
 import dto.Sale;
@@ -239,7 +259,7 @@ public class UserController {
 	 *   pwsearch 요청 : url=pw
 	 */
 	@PostMapping("{url}search") // xxsearch 요청시 호출되는 메서드(idsearch, pwsearch 요청)
-	public ModelAndView search(User user, BindingResult bresult, @PathVariable String url) {
+	public ModelAndView search(User user, BindingResult bresult, @PathVariable String url,HttpServletRequest request) {
 		ModelAndView mav = new ModelAndView();
 		String code = "error.userid.search"; //아이디를 찾을 수 없습니다.
 		if(url.equals("pw")) { //pwsearch 요청인 경우
@@ -269,6 +289,12 @@ public class UserController {
 		if(url.equals("pw")) {
 			result = ShopUtil.getRandomString(6, false, true);
 			service.userChgPass(user.getUserid(), result); //비밀번호 변경
+			
+			if (service.mailSend(user,result,request)) {
+				mav.addObject("msg","비밀번호를 초기화 하여 메일로 전송했습니다.");
+			} else {
+				mav.addObject("msg","초기화된 비밀번호의 메일전송을 실패 했습니다:" + result);
+			}
 		}
 		mav.addObject("result",result);
 		mav.addObject("title",((url.equals("pw")?"비밀번호":"아이디")));

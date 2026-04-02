@@ -22,7 +22,7 @@ public class SaleDao {
 	public void insert(Sale sale) {
 		template.getMapper(cls).insert(sale);
 	}
-
+	
 	public List<Sale> list(String userid) {
 		return template.getMapper(cls).selectList(userid);
 	}

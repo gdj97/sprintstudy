@@ -5,15 +5,18 @@
 <title>${title}찾기</title>
 </head>
 <body><table>
+
  <c:if test="${title=='아이디'}">
   <tr><th>${title} : </th><td>${result}</td></tr>
   <tr><td colspan="2">
         <input type="button" value="아이디전송" onclick="sendclose()"></td></tr>
-  </c:if>        
+ </c:if>        
+
   <c:if test="${title!='아이디'}">
-  <tr><td colspan="2">
-      비밀번호 초기화를 이메일로 전송했습니다.</td></tr>
+  <tr><td> ${msg}</td>
+  <td><input type="button" value="닫기" onclick="self.close()"></td></tr>
   </c:if>      
+
 </table>
 <script type="text/javascript">
    function sendclose() {

@@ -1,9 +1,23 @@
 package service;
 
 
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.util.Date;
 import java.util.List;
+import java.util.Properties;
 
-import javax.validation.Valid;
+import javax.mail.Authenticator;
+import javax.mail.Message;
+import javax.mail.MessagingException;
+import javax.mail.PasswordAuthentication;
+import javax.mail.Session;
+import javax.mail.Transport;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeBodyPart;
+import javax.mail.internet.MimeMessage;
+import javax.mail.internet.MimeMultipart;
+import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -47,5 +61,58 @@ public class UserService {
 	public List<User> getUserList(String[] idchks) {
 		return dao.list(idchks);  //오버로딩된 메서드
 	}
+	
+	public boolean mailSend(User user,String initpw,HttpServletRequest request) {
+		String googleid = "구글아이디";
+		String googlepw = "앱비밀번호";
+		Properties prop = new Properties();
+		MyAuthenticator auth = new MyAuthenticator(googleid,googlepw);
+		String path = request.getServletContext().getRealPath("/") + "/WEB-INF/classes/mail.properties";
+		FileInputStream fis = null;
+		try {
+			fis = new FileInputStream(path);
+			prop.load(fis);
+		} catch (IOException e) {
+			e.printStackTrace();
+		} 
+		prop.put("mail.smtp.user", googleid); //구글아이디로 메일 전송
+		Session session = Session.getInstance(prop,auth);
+		MimeMessage mailmsg = new MimeMessage(session);
+		try {
+			//보내는 사람 설정
+			mailmsg.setFrom(new InternetAddress(googleid + "@gmail.com"));
+			
+//			mailmsg.setRecipient(Message.RecipientType.TO,new InternetAddress(user.getEmail()));
+			mailmsg.setRecipient(Message.RecipientType.TO,new InternetAddress("myungshink67@gmail.com"));
+			mailmsg.setSentDate(new Date());
+			mailmsg.setSubject("비밀번호 초기화");
+			MimeMultipart multipart =new MimeMultipart();
+			MimeBodyPart message = new MimeBodyPart(); 
+			//message type : "text/html; charset=utf-8" => 이메일에서 html 태그 인식
+			//message type : "text/plain; charset=utf-8" => 이메일에서 html 태그 인식 안함
+			message.setContent("<h1 style='color:blue;'>비밀번호 초기화 :" + initpw + "</h1>",
+				               "text/plain; charset=utf-8");  
+			multipart.addBodyPart(message);
+			mailmsg.setContent(multipart);
+			Transport.send(mailmsg);
+			return true;
+		} catch(MessagingException me) {
+			me.printStackTrace();
+		}
+		return false;
+	}	
+	public final class MyAuthenticator extends Authenticator {
+		private String id;
+		private String pw;
+		public MyAuthenticator(String id, String pw) {
+			this.id = id;
+			this.pw = pw;
+		}
+		@Override
+		protected PasswordAuthentication getPasswordAuthentication() {
+			return new PasswordAuthentication(id,pw);
+		}		
+	}
+	
 	
 }
