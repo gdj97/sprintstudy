@@ -14,7 +14,10 @@
      <tr><th>번호</th><th>제목</th><th>글쓴이</th><th>날짜</th><th>조회수</th></tr>
   <c:forEach var="board" items="${boardlist}">
       <tr><td>${boardno}</td><c:set var="boardno" value="${boardno - 1}" />
-      <td><a href="detail?num=${board.num}">${board.title}</a></td>
+      <td><c:if test="${board.grplevel > 0}">
+          <c:forEach begin="2" end="${board.grplevel}">&emsp;&emsp;</c:forEach>└</c:if><%-- ㅂ한자 --%>
+      <a href="detail?num=${board.num}">${board.title}</a>
+      </td>
       <td>${board.writer}</td><td>${board.regdate }</td>
       <td>${board.readcnt}</td></tr>
   </c:forEach>

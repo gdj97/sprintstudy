@@ -36,4 +36,13 @@ public class BoardDao {
 		param.put("boardid",  boardid);		
 		return template.getMapper(cls).selectList(param);
 	}
+	public Board selectOne(Integer num) {
+		return template.getMapper(cls).selectOne(num);
+	}
+	public void addReadcnt(Integer num) {
+		template.getMapper(cls).addReadcnt(num);
+	}
+	public void grpStepAdd(Board board) {
+		template.getMapper(cls).grpStepAdd(board.getGrp(),board.getGrpstep());
+	}
 }

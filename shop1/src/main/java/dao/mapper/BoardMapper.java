@@ -4,7 +4,9 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.ibatis.annotations.Insert;
+import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Update;
 
 import dto.Board;
 
@@ -35,4 +37,13 @@ public interface BoardMapper {
 	@Select(select + " where boardid = #{boardid}"
 	   	+ " order by grp desc, grpstep asc limit #{startrow}, #{limit}")
 	List<Board> selectList(Map<String, Object> param);
+
+	@Select(select + " where num = #{value}")
+	Board selectOne(Integer num);	
+
+    @Update("update board set readcnt = readcnt + 1 where num=#{value}")
+	void addReadcnt(Integer num);
+
+    @Update("update board set grpstep=grpstep + 1  where grp = #{grp} and grpstep > #{grpstep}")
+	void grpStepAdd(@Param("grp") int grp, @Param("grpstep") int grpstep);
 }

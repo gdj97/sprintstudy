@@ -26,4 +26,8 @@ public class SaleDao {
 	public List<Sale> list(String userid) {
 		return template.getMapper(cls).selectList(userid);
 	}
+
+	public List<Sale> listAll(String userid) {
+		return template.getMapper(cls).selectListAll(userid);
+	}
 }

@@ -44,4 +44,22 @@ public class BoardService {
 	public List<Board> boardlist(Integer pageNum, int limit, String boardid) {
 		return dao.list(pageNum,limit,boardid);
 	}
+
+	public Board getBoard(Integer num) {
+		return dao.selectOne(num); 
+	}
+	public void addReadcnt(Integer num) {
+		dao.addReadcnt(num); 
+	}
+
+	public void boardReply(Board board) {
+		dao.grpStepAdd(board); //grp 내의 기존의 원글보다 큰 값을 가진 grpstep의 값을 1 증가시킴. 
+		//답글의 내용을 db에 등록
+		int max = dao.maxNum(); //board 테이블에서 num값의 최대값
+		board.setNum(max+1);    //최대값+1로 추가될 게시물의 num값을 설정
+		board.setGrplevel(board.getGrplevel() + 1); //원글 + 1
+		board.setGrpstep(board.getGrpstep() + 1);   //원글의 바로다음에 출력되도록 설정
+		//원글의 grp, boardid 값은 그대로 유지
+		dao.insert(board);
+	}
 }

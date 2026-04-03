@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 
 import dto.Board;
+import exception.ShopException;
 import service.BoardService;
 
 @Controller
@@ -116,5 +117,61 @@ public class BoardController {
 		 */
 		mav.addObject("boardno", boardno);     //화면에 보여질 게시물 번호의 시작값
 		return mav;
+	}
+	@GetMapping("detail")
+	public String detail(Integer num,Model model) {
+		Board board = service.getBoard(num); //num의 게시물 조회
+		service.addReadcnt(num);   //조회수 증가
+		model.addAttribute("board",board); 
+		return null; // /WEB-INF/view/board/detail.jsp 요청
+	}
+	@GetMapping({"reply","update","delete"})
+	public String getBoard(Integer num,Model model) {
+		Board board = service.getBoard(num);
+		model.addAttribute("board",board);
+		return null;
+	}
+	/*
+	 * order by grp desc, grpstep asc
+	 * 
+	 *      num  grp grplevel grpstep 
+	 * 원글   3    3      0       0  
+	 * 원글   2    2      0       0  
+	 * 답글   6    2      1       1  
+	 * 답글   7    2      2       2  
+	 * 답글   4    2      1       3  
+	 * 원글   1    1      0       0  
+	 * 답글   5    1      1       1  
+	 * 
+	 */
+	/*
+	 * 1. 유효성 검사하기-파라미터값 저장. 
+	 *     - 원글정보 : num,grp,grplevel,grpstep,boardid
+	 *     - 답글정보 : writer,pass,title,content
+	 * 2. db에 insert => BoardService.boardReply()
+	 *     - 원글의 grpstep 보다 큰 기존 등록된 답글의 grpstep 값을 +1 수정 
+	 *       => BoardDao.grpStepAdd()
+	 *       
+	 *     - num : maxNum() + 1  
+	 *     - db에 insert  => BoardDao.insert()
+	 *       grp : 원글과 동일
+	 *       grplevel : 원글의 grplevel + 1    
+	 *       grpstep : 원글의 grpstep + 1
+	 *       
+	 * 3. 등록 성공 : list로 페이지 이동
+	 *    등록 실패 : "답변 등록시 오류 발생" reply 페이지 이동           
+	 */		
+	@PostMapping("reply")
+	public String reply(@Valid Board board,BindingResult bresult ) {
+		if(bresult.hasErrors()) {
+			return null;
+		}
+		try {
+			service.boardReply(board);
+			return "redirect:list?boardid=" + board.getBoardid();
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new ShopException("답변등록시 오류 발생","reply?num="+board.getNum());
+		}
 	}
 }

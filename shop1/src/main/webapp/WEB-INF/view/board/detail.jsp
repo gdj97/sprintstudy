@@ -21,7 +21,7 @@
   .lefttoptable {  height : 250px;	    border-width: 0px;
 	text-align: left;	vertical-align : top;	padding: 0px; }
 </style></head><body>
-<table class="table"><tr><td colspan="2">${board.boardName}</td></tr>
+<table class="table"><tr><td colspan="2" class="text-center h4">${board.boardName}</td></tr>
    <tr><td width="15%">글쓴이</td>
        <td width="85%" class="leftcol">${board.writer}</td></tr>
    <tr><td>제목</td><td class="leftcol">${board.title}</td></tr>
@@ -32,10 +32,10 @@
     <c:if test="${!empty board.fileurl}">
      <a href="file/${board.fileurl}">${board.fileurl}</a>
     </c:if></td></tr>
-   <tr><td colspan="2">
+   <tr><td colspan="2" class="text-center">
      <a href="reply?num=${board.num}" class="btn btn-success">답변</a>
-     <a href="update?num=${board.num}" class="btn btn-primary">[수정]</a>
-     <a href="delete?num=${board.num}" class="btn btn-danger">[삭제]</a>
-     <a href="list?boardid=${board.boardid}">[게시물목록]</a>
+     <a href="update?num=${board.num}" class="btn btn-primary">수정</a>
+     <a href="delete?num=${board.num}" class="btn btn-danger">삭제</a>
+     <a href="list?boardid=${board.boardid}" class="btn btn-primary">게시물목록</a>
    </td></tr></table>
  </body></html>

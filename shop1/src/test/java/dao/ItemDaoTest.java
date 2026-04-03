@@ -1,10 +1,11 @@
 package dao;
 
-import static org.junit.jupiter.api.Assertions.assertNull;
+
+import static org.junit.Assert.assertNull;
 
 import java.util.List;
 
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import dto.Item;
