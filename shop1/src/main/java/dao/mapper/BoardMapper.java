@@ -3,6 +3,7 @@ package dao.mapper;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
@@ -23,7 +24,10 @@ public interface BoardMapper {
 			+ " #{boardid}, now(), 0,#{grp},#{grplevel}, #{grpstep})")
 	void insert(Board board);
 
-	@Select("select count(*) from board where boardid=#{boardid} ")
+	@Select({"<script>",
+		"select count(*) from board where boardid=#{boardid} ",
+		"<if test='searchtype != null'>and ${searchtype} like '%${searchcontent}%'</if>",
+		"</script>"})
 	int count(Map<String, Object> param);
 	/*
 	 * limit #{startrow}, #{limit} : 조회된 레코드 중 일부만 리턴. mysql, mariadb 사용가능 예약어
@@ -34,8 +38,11 @@ public interface BoardMapper {
 	 * 오라클 : rownum : 레코드의 조회되는 순서를 의미하는 예약어
 	 * 
 	 */
-	@Select(select + " where boardid = #{boardid}"
-	   	+ " order by grp desc, grpstep asc limit #{startrow}, #{limit}")
+	@Select({"<script>",
+		   select + " where boardid = #{boardid}",
+		"<if test='searchtype != null'>and ${searchtype} like '%${searchcontent}%'</if>",
+	   	 " order by grp desc, grpstep asc limit #{startrow}, #{limit}",
+	   	"</script>"})
 	List<Board> selectList(Map<String, Object> param);
 
 	@Select(select + " where num = #{value}")
@@ -46,4 +53,11 @@ public interface BoardMapper {
 
     @Update("update board set grpstep=grpstep + 1  where grp = #{grp} and grpstep > #{grpstep}")
 	void grpStepAdd(@Param("grp") int grp, @Param("grpstep") int grpstep);
+
+    @Update("update board set writer=#{writer},title=#{title},content=#{content},"
+			 + " file1=#{fileurl} where num=#{num}")
+    void update(Board board);
+
+    @Delete("delete from board where num=#{value}")
+	void delete(int num);
 }

@@ -38,11 +38,12 @@ public class BoardService {
 			e.printStackTrace();
 		}		
 	}	
-	public int boardcount(String boardid) {
-		return dao.count(boardid);
+	public int boardcount(String boardid, String searchtype, String searchcontent) {
+		return dao.count(boardid,searchtype,searchcontent);
 	}
-	public List<Board> boardlist(Integer pageNum, int limit, String boardid) {
-		return dao.list(pageNum,limit,boardid);
+	public List<Board> boardlist
+	   (Integer pageNum, int limit, String boardid,String searchtype, String searchcontent) {
+		return dao.list(pageNum,limit,boardid,searchtype,searchcontent);
 	}
 
 	public Board getBoard(Integer num) {
@@ -61,5 +62,21 @@ public class BoardService {
 		board.setGrpstep(board.getGrpstep() + 1);   //원글의 바로다음에 출력되도록 설정
 		//원글의 grp, boardid 값은 그대로 유지
 		dao.insert(board);
+	}
+
+	public void boardUpdate(Board board, HttpServletRequest request) {
+		//첨부파일 업로드
+		if(board.getFile1() != null && !board.getFile1().isEmpty()) { //첨부파일이 수정된경우. 
+			String path = request.getServletContext().getRealPath("/") + "board/file/";
+			uploadFileCreate(board.getFile1(), path);  
+			//board.getFileurl() : 수정전 첨부파일명 
+			board.setFileurl(board.getFile1().getOriginalFilename()); //첨부된 파일이름 fileUrl 프로퍼티값 변경
+		}
+		//db 수정
+		dao.update(board);		
+	}
+
+	public void boardDelete(int num) {
+		dao.delete(num);
 	}
 }

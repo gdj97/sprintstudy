@@ -1,5 +1,7 @@
 package controller;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -17,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 
+import ch.qos.logback.core.recovery.ResilientSyslogOutputStream;
 import dto.Board;
 import exception.ShopException;
 import service.BoardService;
@@ -61,6 +64,8 @@ public class BoardController {
 		}
 		String boardid = param.get("boardid");
 		if (boardid == null) boardid = "1";
+		String searchtype = param.get("searchtype");
+		String searchcontent = param.get("searchcontent");
 		
 		ModelAndView mav = new ModelAndView();
 		String boardName = null;
@@ -70,8 +75,8 @@ public class BoardController {
 		   case "3" : boardName = "QNA"; break;
 		}
 		int limit = 10;  //화면에 출력될 게시물 건수. 
-		int listcount = service.boardcount(boardid); //게시판 종류별 전체 등록된 게시물 건수
-		List<Board> boardlist = service.boardlist(pageNum,limit,boardid); //화면에 출력할 게시글 목록
+		int listcount = service.boardcount(boardid,searchtype,searchcontent); //게시판 종류별,검색내용으로 전체 등록된 게시물 건수
+		List<Board> boardlist = service.boardlist(pageNum,limit,boardid,searchtype,searchcontent); //화면에 출력할 게시글 목록
 		int maxpage = (int)((double)listcount/limit + 0.95); //최대페이지
 		/*  listcount : 3
 		 *   (int)((double)3/10 + 0.95) => (int)(1.25) > 1 
@@ -116,6 +121,7 @@ public class BoardController {
 		 *   
 		 */
 		mav.addObject("boardno", boardno);     //화면에 보여질 게시물 번호의 시작값
+		mav.addObject("today", new SimpleDateFormat("yyyyMMdd").format(new Date()));
 		return mav;
 	}
 	@GetMapping("detail")
@@ -162,8 +168,12 @@ public class BoardController {
 	 *    등록 실패 : "답변 등록시 오류 발생" reply 페이지 이동           
 	 */		
 	@PostMapping("reply")
-	public String reply(@Valid Board board,BindingResult bresult ) {
+	public String reply(@Valid Board board,BindingResult bresult,Model model ) {
 		if(bresult.hasErrors()) {
+    		Map<String,Object> map = bresult.getModel();
+    		Board b = (Board)map.get("board"); //화면에서 입력받은 값을 저장한 Board 객체
+    		b.setTitle(board.getTitle().substring(3));//원글의 제목으로 변경
+			model.addAllAttributes(bresult.getModel());
 			return null;
 		}
 		try {
@@ -172,6 +182,63 @@ public class BoardController {
 		} catch (Exception e) {
 			e.printStackTrace();
 			throw new ShopException("답변등록시 오류 발생","reply?num="+board.getNum());
+		}
+	}
+	/*
+	 * 1. 유효성 검사하기-파라미터값 저장.
+	 * 2. 비밀번호 검증
+	 * 3. db에 update => BoardService.boardReply()
+	 *     - db에 update  => BoardDao.update()
+	 * 4. 변경 성공 : list로 페이지 이동
+	 *    변경 실패 : "게시글 수정시 오류 발생" update 페이지 이동           
+	 */		
+	@PostMapping("update")
+	public String update(@Valid Board board, BindingResult bresult, HttpServletRequest request) {
+		if(bresult.hasErrors()) {
+			return null;
+		}
+		Board dbBoard = service.getBoard(board.getNum());
+		//board.getPass() : 입력된 비밀번호
+		//dbBoard.getPass() : db에 등록된 비밀번호
+		if(!board.getPass().equals(dbBoard.getPass())) {
+			throw new ShopException("비밀번호가 틀립니다.",  "update?num="+board.getNum());			
+		}
+		try {
+			//1. db의 내용을 등록된 내용으로 변경 : writer, title, content, file1
+			//2. file 업로드.
+			service.boardUpdate(board,request);
+			return "redirect:list?boardid="+board.getBoardid();
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new ShopException("게시글 수정에 실패 했습니다.", "update?num="+board.getNum());			
+		}
+	}	
+	/*
+    1. 비밀번호가 일치하면 num 해당하는 게시물 삭제.
+       비밀번호 오류시 globalError 방식으로 처리하기
+    2. BoardService.boardDelete 
+       boardDao.delete 메서드 명으로 처리하기   
+	 */
+	@PostMapping("delete")
+	public String delete(Board board, BindingResult bresult,Model model) {
+		Board dbBoard = service.getBoard(board.getNum());
+		//입력값 검증
+		if(board.getPass() == null || board.getPass().trim().equals("")) {
+			bresult.reject("error.required.password");
+			return "board/delete";
+		}
+		//비밀번호 검증
+		if(!board.getPass().equals(dbBoard.getPass())) {
+			bresult.reject("error.check.password");
+			return null;
+		}
+		//게시물 삭제
+		try {
+			service.boardDelete(board.getNum());
+			return "redirect:list?boardid="+dbBoard.getBoardid();
+		} catch (Exception e) {
+			bresult.reject("error.board.delete");
+			return null;
 		}
 	}
 }

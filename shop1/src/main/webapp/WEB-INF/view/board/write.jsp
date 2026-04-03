@@ -25,4 +25,20 @@
   <tr><td colspan="2" class="text-center">
        <a href="javascript:document.f.submit()" class="btn btn-primary">게시글등록</a>
        <a href="list?boardid=${param.boardid}" class="btn btn-success">게시글목록</a></td></tr>                        
-</table></form:form></body></html>
+</table></form:form>
+<script type="text/javascript">
+$(function(){
+	  $("#summernote").summernote({
+		  height:300,
+		  callbacks : {
+			  onImageUpload : function(images) {
+				  for(let i=0;i < images.length;i++) {
+					  sendFile(images[i])
+				  }
+			  }
+		  }
+	  })
+})
+</script>
+
+</body></html>

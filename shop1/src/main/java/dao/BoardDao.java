@@ -24,16 +24,20 @@ public class BoardDao {
 	public void insert(Board board) {  //board 내용을 board 테이블에 저장
 		template.getMapper(cls).insert(board);
 	}
-	public int count(String boardid) {
+	public int count(String boardid,String searchtype, String searchcontent) {
 		param.clear();
 		param.put("boardid", boardid);
+		param.put("searchtype", searchtype);
+		param.put("searchcontent", searchcontent);
 		return template.getMapper(cls).count(param);
 	}
-	public List<Board> list(Integer pageNum, int limit, String boardid) {
+	public List<Board> list(Integer pageNum, int limit, String boardid,String searchtype, String searchcontent) {
 		param.clear();
 		param.put("startrow", (pageNum - 1) * limit); //10
 		param.put("limit",  limit);		              //10
-		param.put("boardid",  boardid);		
+		param.put("boardid",  boardid);	
+		param.put("searchtype", searchtype);
+		param.put("searchcontent", searchcontent);
 		return template.getMapper(cls).selectList(param);
 	}
 	public Board selectOne(Integer num) {
@@ -44,5 +48,11 @@ public class BoardDao {
 	}
 	public void grpStepAdd(Board board) {
 		template.getMapper(cls).grpStepAdd(board.getGrp(),board.getGrpstep());
+	}
+	public void update(Board board) {
+		template.getMapper(cls).update(board);		
+	}
+	public void delete(int num) {
+		template.getMapper(cls).delete(num);
 	}
 }
