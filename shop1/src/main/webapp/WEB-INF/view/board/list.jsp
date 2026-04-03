@@ -4,6 +4,7 @@
     1. 첨부파일이 있는 경우 목록에 표시하기
     2. 오늘 등록한 게시물의 날짜는  HH:mm:ss 로
        이전 등록한 게시물의 날짜는  yyyy-MM-dd HH:mm:ss 형식으로 출력하기 
+    3. 중복된 검색이 가능하게 구현하기   
 --%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
@@ -21,7 +22,11 @@
       <option value="">선택하세요</option>
       <option value="title">제목</option>
       <option value="writer">작성자</option>
-      <option value="content">내용</option></select>
+      <option value="content">내용</option>
+      <option value="title,writer">제목+작성자</option>
+      <option value="title,content">제목+내용</option>
+      <option value="writer,content">작성자+내용</option>
+      </select>
       <script type="text/javascript">
             searchform.searchtype.value="${param.searchtype}";
       </script></td>
@@ -36,9 +41,9 @@
 <table class="table">
 <colgroup>
   <col style="width:10%">
-  <col style="width:50%">
+  <col style="width:40%">
   <col style="width:20%">
-  <col style="width:10%">
+  <col style="width:20%">
   <col style="width:10%">
   <colgroup>
 </colgroup>
