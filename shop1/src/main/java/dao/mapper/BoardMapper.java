@@ -26,9 +26,22 @@ public interface BoardMapper {
 
 	@Select({"<script>",
 		"select count(*) from board where boardid=#{boardid} ",
-		"<if test='searchtype != null'>and ${searchtype} like '%${searchcontent}%'</if>",
+		"<if test='col1 != null and col2==null'>and ${col1} like '%${searchcontent}%'</if>",
+		"<if test='col1 != null and col2!=null'>and (${col1} like '%${searchcontent}%' or ${col2} like '%${searchcontent}%')</if>",
 		"</script>"})
 	int count(Map<String, Object> param);
+	/*
+	 * cols = ["title","writer"]
+	 * select count(*) from board where boardid=#{boardid}
+	 * and ( title like %구% or writer like %구%)
+	 */
+	@Select({"<script>",
+		"select count(*) from board where boardid=#{boardid} ",
+		"<if test='cols != null'> and "
+		+ "<foreach collection='cols' item='c' separator='or' open='(' close=')'> ${c} like '%${searchcontent}%'</foreach></if>",
+		"</script>"})
+	int count2(Map<String, Object> param);
+	
 	/*
 	 * limit #{startrow}, #{limit} : 조회된 레코드 중 일부만 리턴. mysql, mariadb 사용가능 예약어
 	 * 1페이지 :     0   ,  10    => 첫번째 레코드에서 10개만 리턴
@@ -40,10 +53,18 @@ public interface BoardMapper {
 	 */
 	@Select({"<script>",
 		   select + " where boardid = #{boardid}",
-		"<if test='searchtype != null'>and ${searchtype} like '%${searchcontent}%'</if>",
+		"<if test='col1 != null and col2==null'>and ${col1} like '%${searchcontent}%'</if>",
+		"<if test='col1 != null and col2!=null'>and (${col1} like '%${searchcontent}%' or ${col2} like '%${searchcontent}%')</if>",
 	   	 " order by grp desc, grpstep asc limit #{startrow}, #{limit}",
 	   	"</script>"})
 	List<Board> selectList(Map<String, Object> param);
+	@Select({"<script>",
+		   select + " where boardid = #{boardid}",
+			"<if test='cols != null'> and "
+			+ "<foreach collection='cols' item='c' separator='or' open='(' close=')'> ${c} like '%${searchcontent}%'</foreach></if>",
+	   	 " order by grp desc, grpstep asc limit #{startrow}, #{limit}",
+	   	"</script>"})
+	List<Board> selectList2(Map<String, Object> param);
 
 	@Select(select + " where num = #{value}")
 	Board selectOne(Integer num);	

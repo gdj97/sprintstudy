@@ -39,16 +39,16 @@ public class MvcConfig implements WebMvcConfigurer{
 		return vr;
 	}
 	//기본 웹파일 처리를 위한 설정
-//	@Override
-//	public void configureDefaultServletHandling(DefaultServletHandlerConfigurer configurer) {
-//		configurer.enable();
-//	}
-	
 	@Override
-	public void addResourceHandlers(ResourceHandlerRegistry registry) {
-	    registry.addResourceHandler("/board/file/**")
-	    .addResourceLocations("/board/file/"); // 실제 파일이 있는 폴더 경로
+	public void configureDefaultServletHandling(DefaultServletHandlerConfigurer configurer) {
+		configurer.enable();
 	}
+	
+//	@Override
+//	public void addResourceHandlers(ResourceHandlerRegistry registry) {
+//	    registry.addResourceHandler("/board/file/**")
+//	    .addResourceLocations("/board/file/"); // 실제 파일이 있는 폴더 경로
+//	}
 	
 	//파일 업로드를 위한 설정. enctype="multipart/form-data" 형식의 요청시 처리. 
 	// 파라미터값, 파일정보등을 저장. 

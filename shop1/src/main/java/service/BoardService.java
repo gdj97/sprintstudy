@@ -39,11 +39,13 @@ public class BoardService {
 		}		
 	}	
 	public int boardcount(String boardid, String searchtype, String searchcontent) {
-		return dao.count(boardid,searchtype,searchcontent);
+//		return dao.count(boardid,searchtype,searchcontent);
+		return dao.count2(boardid,searchtype,searchcontent);
 	}
 	public List<Board> boardlist
 	   (Integer pageNum, int limit, String boardid,String searchtype, String searchcontent) {
-		return dao.list(pageNum,limit,boardid,searchtype,searchcontent);
+//		return dao.list(pageNum,limit,boardid,searchtype,searchcontent);
+		return dao.list2(pageNum,limit,boardid,searchtype,searchcontent);
 	}
 
 	public Board getBoard(Integer num) {

@@ -19,6 +19,13 @@
   <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
   --%>
+  
+<%--
+  summernote 설정 
+    summernote : WYSIWYG(What You See Is You Get) 에디터 (CKEditor)
+                 웹에서 서식 설정할 수 있는 에디터
+                 JQuery 기반, Bootstrap과 호환됨
+ --%>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
 <link href="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-bs4.min.css" rel="stylesheet">
 

@@ -27,18 +27,52 @@ public class BoardDao {
 	public int count(String boardid,String searchtype, String searchcontent) {
 		param.clear();
 		param.put("boardid", boardid);
-		param.put("searchtype", searchtype);
+		if(searchtype != null) {
+			String[] cols = searchtype.split(",");
+			switch(cols.length) {
+				case 2 : param.put("col2", cols[1]);
+				case 1 : param.put("col1", cols[0]);
+			}
+		}
 		param.put("searchcontent", searchcontent);
 		return template.getMapper(cls).count(param);
+	}
+	public int count2(String boardid,String searchtype, String searchcontent) {
+		param.clear();
+		param.put("boardid", boardid);
+		if(searchtype != null) {
+			String[] cols = searchtype.split(",");
+			param.put("cols", cols);
+		}
+		param.put("searchcontent", searchcontent);
+		return template.getMapper(cls).count2(param);
 	}
 	public List<Board> list(Integer pageNum, int limit, String boardid,String searchtype, String searchcontent) {
 		param.clear();
 		param.put("startrow", (pageNum - 1) * limit); //10
 		param.put("limit",  limit);		              //10
 		param.put("boardid",  boardid);	
-		param.put("searchtype", searchtype);
+		if(searchtype != null) {
+			String[] cols = searchtype.split(",");
+			switch(cols.length) {
+				case 2 : param.put("col2", cols[1]);
+				case 1 : param.put("col1", cols[0]);
+			}
+		}
 		param.put("searchcontent", searchcontent);
 		return template.getMapper(cls).selectList(param);
+	}
+	public List<Board> list2 (Integer pageNum, int limit, String boardid,String searchtype, String searchcontent) {
+		param.clear();
+		param.put("startrow", (pageNum - 1) * limit); //10
+		param.put("limit",  limit);		              //10
+		param.put("boardid",  boardid);	
+		if(searchtype != null) {
+			String[] cols = searchtype.split(",");
+			param.put("cols", cols);
+		}
+		param.put("searchcontent", searchcontent);
+		return template.getMapper(cls).selectList2(param);
 	}
 	public Board selectOne(Integer num) {
 		return template.getMapper(cls).selectOne(num);

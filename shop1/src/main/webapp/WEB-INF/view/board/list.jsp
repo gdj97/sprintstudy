@@ -1,6 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
-<%-- /WEB-INF/view/board/list.jsp
+<%-- /WEB-INF/view/board/list.jsp 
     1. 첨부파일이 있는 경우 목록에 표시하기
     2. 오늘 등록한 게시물의 날짜는  HH:mm:ss 로
        이전 등록한 게시물의 날짜는  yyyy-MM-dd HH:mm:ss 형식으로 출력하기 
@@ -26,7 +26,8 @@
       <option value="title,writer">제목+작성자</option>
       <option value="title,content">제목+내용</option>
       <option value="writer,content">작성자+내용</option>
-      </select>
+      <option value="title,writer,content">제목+작성자+내용</option>
+</select>
       <script type="text/javascript">
             searchform.searchtype.value="${param.searchtype}";
       </script></td>
@@ -40,11 +41,11 @@
 </form>
 <table class="table">
 <colgroup>
-  <col style="width:10%">
-  <col style="width:40%">
-  <col style="width:20%">
-  <col style="width:20%">
-  <col style="width:10%">
+  <col style="width:10%"><%-- 번호 --%>
+  <col style="width:40%"><%-- 제목 --%>
+  <col style="width:20%"><%-- 글쓴이 --%>
+  <col style="width:20%"><%-- 날짜 --%>
+  <col style="width:10%"><%-- 조회수 --%>
   <colgroup>
 </colgroup>
     <c:if test="${listcount > 0}"> <!-- 등록된 게시물 건수 -->
@@ -53,12 +54,25 @@
   <c:forEach var="board" items="${boardlist}">
       <tr><td>${boardno}</td><c:set var="boardno" value="${boardno - 1}" />
       <td class="text-left">
+      <%-- ! empty board.fileurl  : 첨부파일이 존재 --%>
+      <c:if test="${! empty board.fileurl}">
+        <a href="file/${board.fileurl}">@</a></c:if>
+      <c:if test="${empty board.fileurl}">&nbsp;&nbsp;&nbsp;</c:if>
+      
       <c:if test="${board.grplevel > 0}">
           <c:forEach begin="2" end="${board.grplevel}">&emsp;&emsp;</c:forEach>└</c:if><%-- ㅂ한자 --%>
       <a href="detail?num=${board.num}">${board.title}</a>
       </td>
       <td>${board.writer}</td>
-      <td>${board.regdate }</td>
+      <td>
+      <%-- 오늘등록된 게시물의 날짜와, 이전 등록 게시물 날짜 표기를 다르게 수정하기 --%>
+        <fmt:formatDate value="${board.regdate }" pattern="yyyyMMdd" var="rdate"/> <%-- 게시물등록일자를 문자열 --%>
+      <c:if test="${today == rdate }">
+        <fmt:formatDate value="${board.regdate }" pattern="HH:mm:ss" /></c:if>
+      <c:if test="${today != rdate }">
+        <fmt:formatDate value="${board.regdate }" pattern="yyyy-MM-dd HH:mm:ss" />
+      </c:if>
+      </td>
       <td>${board.readcnt}</td></tr>
   </c:forEach>
   
@@ -68,8 +82,7 @@
      <c:if test="${pageNum <= 1}"><span  class="btn btn-secondary">이전</span></c:if>
      <c:forEach var="a" begin="${startpage }" end="${endpage}">
          <c:if test="${a == pageNum}"><span class="btn btn-success">${a}</span></c:if>
-         <c:if test="${a != pageNum}">
-           <a href="javascript:listpage(${a})" class="btn btn-secondary">${a}</a></c:if>
+         <c:if test="${a != pageNum}"><a href="javascript:listpage(${a})" class="btn btn-secondary">${a}</a></c:if>
      </c:forEach>
      <c:if test="${pageNum < maxpage}">
        <a href="javascript:listpage(${pageNum + 1})" class="btn btn-primary">다음</a></c:if>
@@ -80,7 +93,10 @@
       <tr><td colspan="5">등록된 게시물이 없습니다.</td></tr>
    </c:if>
    <tr><td colspan="5" class="text-center">
-   <a href="write?boardid=${boardid}" class="btn btn-danger">글쓰기</a></td></tr>
+   <%-- 공지사항인 경우 관리자가 아니면 글쓰기 버튼 없애기 --%>
+   <c:if test="${param.boardid != 1 || loginUser.userid == 'admin' }">
+   <a href="write?boardid=${boardid}" class="btn btn-danger">글쓰기</a>
+   </c:if></td></tr>
 </table>
 <script type="text/javascript">
 	function listpage(page) {

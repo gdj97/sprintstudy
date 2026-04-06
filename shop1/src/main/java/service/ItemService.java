@@ -94,21 +94,18 @@ public class ItemService {
 	}
 
 	public List<Sale> saleList(String userid) {
-//		//[{saleid:1,userid:test1,..},{saleid:3,userid:test1,..}]
-//		List<Sale> list = saleDao.list(userid); //userid가 주문한 sale 정보 목록
-//		//list의 Sale 객체에 SaleItem 객체목록 저장
-//		for(Sale sa : list) { //sa : {saleid:1,userid:test1,..}
-//			//saleItemList : saleid에 해당하는 주문상품 목록
-//			List<SaleItem> saleItemList = saleItemDao.list(sa.getSaleid()); //주문번호에 해당하는 주문상품 목록
-//			for(SaleItem si : saleItemList) {
-//				Item item = itemDao.selectOne(si.getItemid());  //주문상품의 상품정보
-//				si.setItem(item); //상품정보
-//			}
-//			sa.setItemList(saleItemList);
-//		}
-//		return list;
-		List<Sale> list = saleDao.listAll(userid);
-		return list;
-		
+		//[{saleid:1,userid:test1,..},{saleid:3,userid:test1,..}]
+		List<Sale> list = saleDao.list(userid); //userid가 주문한 sale 정보 목록
+		//list의 Sale 객체에 SaleItem 객체목록 저장
+		for(Sale sa : list) { //sa : {saleid:1,userid:test1,..}
+			//saleItemList : saleid에 해당하는 주문상품 목록
+			List<SaleItem> saleItemList = saleItemDao.list(sa.getSaleid()); //주문번호에 해당하는 주문상품 목록
+			for(SaleItem si : saleItemList) {
+				Item item = itemDao.selectOne(si.getItemid());  //주문상품의 상품정보
+				si.setItem(item); //상품정보
+			}
+			sa.setItemList(saleItemList);
+		}
+		return list;		
 	}
 }
