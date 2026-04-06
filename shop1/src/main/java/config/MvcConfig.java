@@ -14,11 +14,14 @@ import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.ViewResolver;
 import org.springframework.web.servlet.config.annotation.DefaultServletHandlerConfigurer;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
+import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.handler.SimpleMappingExceptionResolver;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
+
+import intercepter.BoardIntercepter;
 
 @Configuration
 @ComponentScan(basePackages= {"controller","dto","service","dao","aop"})
@@ -83,5 +86,12 @@ public class MvcConfig implements WebMvcConfigurer{
 		ms.setDefaultEncoding("UTF-8");
 		return ms;
 	}
-	
+	//인터셉터관련 설정
+	@Override
+	public void addInterceptors(InterceptorRegistry registry) {
+		registry.addInterceptor(new BoardIntercepter())  //인테셉터 객체 설정
+		.addPathPatterns("/board/write")   //url 정보 추가
+		.addPathPatterns("/board/update")
+		.addPathPatterns("/board/delete");		
+	}	
 }

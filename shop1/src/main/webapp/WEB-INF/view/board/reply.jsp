@@ -22,4 +22,19 @@
   <tr><td>내용</td><td><textarea name="content" rows="15" cols="80" id="summernote" class="form-control"></textarea>
    <form:errors path="content"  cssStyle="color:red"/></td></tr>
   <tr><td colspan="2" class="text-center"><button class="btn btn-primary">답변글등록</button></td></tr>    
-  </table></form:form></body></html>
+  </table></form:form>
+  <script type="text/javascript">
+  $(function(){
+  	  $("#summernote").summernote({
+  		  height:300,
+  		  callbacks : {
+  			  onImageUpload : function(images) {
+  				  for(let i=0;i < images.length;i++) {
+  					  sendFile(images[i])
+  				  }
+  			  }
+  		  }
+  	  })
+  })
+  </script>
+  </body></html>

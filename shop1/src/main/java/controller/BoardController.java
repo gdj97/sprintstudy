@@ -21,6 +21,7 @@ import org.springframework.web.servlet.ModelAndView;
 
 import ch.qos.logback.core.recovery.ResilientSyslogOutputStream;
 import dto.Board;
+import dto.Comment;
 import exception.ShopException;
 import service.BoardService;
 
@@ -129,8 +130,12 @@ public class BoardController {
 		Board board = service.getBoard(num); //num의 게시물 조회
 		service.addReadcnt(num);   //조회수 증가
 		model.addAttribute("board",board); 
+		model.addAttribute("comment",new Comment());
+		List<Comment> commlist = service.commentList(num); //num:게시물번호. 게시물번호에 해당하는 댓글목록 조회
+		model.addAttribute("commlist",commlist);
 		return null; // /WEB-INF/view/board/detail.jsp 요청
 	}
+	
 	@GetMapping({"reply","update","delete"})
 	public String getBoard(Integer num,Model model) {
 		Board board = service.getBoard(num);
@@ -241,4 +246,33 @@ public class BoardController {
 			return null;
 		}
 	}
+	@RequestMapping("comment")  //댓글 등록
+	public String comment(@Valid Comment comm,BindingResult bresult) {
+		String view = "board/detail";
+		if(bresult.hasErrors()) {
+			return view;   //detail.jsp로 페이지만 이동. board 데이터 없음. 
+		}
+		int seq = service.commmaxseq(comm.getNum());  //댓글번호 최대값
+		comm.setSeq(++seq); //댓글 등록전에 seq 설정.
+		service.comminsert(comm);  //댓글 등록
+		return "redirect:detail?num="+comm.getNum()+"#comment";
+	}
+	/*
+	 * 1. 파라미터 : num,seq,pass
+	 * 2. pass값과 db에 등록된 비밀번호 검증
+	 *    일치 : 게시물 삭제. detail로 페이지 이동
+	 *    불일치 : 비밀번호 오류. detail로 페이지 이동
+	 */
+	@PostMapping("commdel")
+	public String commdel(Comment comm) {
+		Comment dbComm = service.getComment(comm.getNum(),comm.getSeq());
+		if(comm.getPass().equals(dbComm.getPass())) {
+			service.commendDel(comm.getNum(),comm.getSeq());
+			return "redirect:detail?num="+comm.getNum() + "#comment";
+		} else {
+			throw new ShopException
+			("비밀번호가 틀립니다. 비밀번호를 확인하세요","detail?num="+comm.getNum() + "#comment");
+		}
+	}
+	
 }

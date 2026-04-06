@@ -36,4 +36,17 @@
     	document.f.fileurl.value = ""
 	    document.getElementById("file_desc").style.display = "none";
     }
+    $(function(){
+  	  $("#summernote").summernote({
+  		  height:300,
+  		  callbacks : {
+  			  onImageUpload : function(images) {
+  				  for(let i=0;i < images.length;i++) {
+  					  sendFile(images[i])
+  				  }
+  			  }
+  		  }
+  	  })
+  })
+    
 </script></body></html>

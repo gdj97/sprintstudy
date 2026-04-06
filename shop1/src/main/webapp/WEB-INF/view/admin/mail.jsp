@@ -25,9 +25,23 @@
   <option value="text/plain; charset=utf-8">TEXT</option></select></td></tr>
 <tr><td>첨부파일1</td><td><input type="file" name="file1"></td></tr>
 <tr><td>첨부파일2</td><td><input type="file" name="file1"></td></tr>
-<tr><td colspan="2"><form:textarea path="contents" cols="120" rows="10" class="form-control" />
+<tr><td colspan="2"><form:textarea path="contents" cols="120" rows="10" class="form-control" id="summernote"/>
 <form:errors path="contents" class="text-danger"/>
  </td></tr>
 <tr><td colspan="2" class="text-center"><button class="btn btn-primary">메일보내기</button></td></tr>
 </table></form:form>
+<script type="text/javascript">
+$(function(){
+	  $("#summernote").summernote({
+		  height:300,
+		  callbacks : {
+			  onImageUpload : function(images) {
+				  for(let i=0;i < images.length;i++) {
+					  sendFile(images[i])
+				  }
+			  }
+		  }
+	  })
+})
+</script>
 </body></html>

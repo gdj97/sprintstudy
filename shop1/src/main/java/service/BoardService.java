@@ -10,11 +10,15 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import dao.BoardDao;
+import dao.CommentDao;
 import dto.Board;
+import dto.Comment;
 @Service
 public class BoardService {
 	@Autowired
 	BoardDao dao;
+	@Autowired
+	CommentDao commDao;
 
 	public void boardWrite(Board board, HttpServletRequest request) {
 		int maxnum = dao.maxNum();  //board 테이블의 최대 num 컬럼의 값을 리턴
@@ -81,4 +85,21 @@ public class BoardService {
 	public void boardDelete(int num) {
 		dao.delete(num);
 	}
+	public int commmaxseq(int num) {
+		return commDao.maxseq(num);
+	}
+	public void comminsert(Comment comm) {
+		commDao.insert(comm);
+	}
+	public List<Comment> commentList(Integer num) {
+		return commDao.list(num);
+	}
+
+	public Comment getComment(int num, int seq) {
+		return commDao.selectOne(num,seq);
+	}
+
+	public void commendDel(int num, int seq) {
+		commDao.delete(num,seq);
+	}	
 }
