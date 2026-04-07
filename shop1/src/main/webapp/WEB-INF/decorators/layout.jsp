@@ -6,6 +6,13 @@
   <sitemesh:write property="title" />
   <sitemesh:write property="head" />
   <sitemesh:write property="body" />
+  
+  ======================================
+  2026-04-07 과제
+     1. http://gudi.kr/ 의 로고를 layout.jsp에 추가하기
+        /shop1/ajax/goodeelogo 요청
+        id="goodeelogo" 인 태그에 출력하기
+     2. 게시물등록, 게시물수정,답변등록,이메일화면 이미지업로드가 되도록 수정하기   
 --%>    
 <!DOCTYPE html>
 <html lang="en">
@@ -73,6 +80,7 @@
         <a class="nav-link" href="${path}/board/list?boardid=3">QNA</a>
       </li>    
     </ul>
+        
     <ul class="navbar-nav">
   	  <c:if test="${empty sessionScope.loginUser}">
         <li class="nav-item">
@@ -97,6 +105,10 @@
 <div class="container-fluid px-5" style="margin-top:30px">
   <div class="row">
     <div class="col-sm-4">
+    <%-- 로고 --%>
+    <div id="goodeelogo"></div>
+    <hr>
+    
       <ul class="nav nav-pills flex-column">
         <li class="nav-item">
 			<c:if test="${empty sessionScope.loginUser}">
@@ -110,10 +122,11 @@
         </li>
       </ul>
       <hr>
-      <h2>About Me</h2>
-      <h5>Photo of me:</h5>
-      <div class="fakeimg">Fake Image</div>
-      <p>Some text about me in culpa qui officia deserunt mollit anim..</p>
+      <h5>수출입 은행 환율정보</h5>
+      <div style="width:100%">
+      	<div id="exchange" style="width:70%; margin:6px;"></div>
+      </div>
+
       <h3>Some Links</h3>
       <p>Lorem ipsum dolor sit ame.</p>
       
@@ -146,16 +159,19 @@
     </span></div>   
 </div>
 <script>
-$(function(){
-	getSido();
+$(function(){  //화면 준비되면
+	goodeelogo();
+	getSido(); //호이스팅기능: 선언보다 먼저 호출되는 것이 가능
+//	exchangeString();
+	exchangeJson();
 })
-function getSido() {
+function getSido() { 
 	$.ajax({
-		url : "/ajax/select1",
-		success : function(data) {		
-			   console.log(data)
+		url : "${path}/ajax/select1",
+		success : function(data) {	//서버에서 문자열로 데이터 전달. 	
+//			   console.log(data) //[서울특별시,경기도,경상북도,....] 
 			   let arr = data.substring(data.indexOf('[')+1, data.indexOf(']')).split(",");
-			   $.each(arr,function(i,item){
+			   $.each(arr,function(i,item){ //i:인덱스, item:내용(서울특별시,경기도,...)
 				   $("select[name=si]").append(function(){
 					   return "<option>"+item+"</option>"
 				   })
@@ -163,6 +179,73 @@ function getSido() {
 		}
 	})
 }
+function getText(name) {
+	let city = $("select[name='si']").val();  // 시도 선택값
+	let gu = $("select[name='gu']").val();    // 구군 선택값
+	let disname;    //option 태그의 위치값. select 태그의 이름
+	let toptext="구군을 선택하세요";
+	let params = "";
+	if (name == "si") { //시도를 선택한 경우
+		params = "si=" + city.trim();  // 예:서울특별시, 경기도 ..
+		disname = "gu";                // 변경할 select 태그의 name 속성값  
+	} else if (name == "gu") { //구군를 선택한 경우
+		params = "si=" + city.trim()+"&gu="+gu.trim();  //예 : si=서울특별시&gu=금천구,...
+		disname = "dong";              // 변경할 select 태그의 name 속성값
+		toptext="동리를 선택하세요";		
+	} else { 
+		return ;
+	}
+	$.ajax({
+	  url : "${path}/ajax/select",   // 결과값 List<String> 형태로 서버에서 리턴
+ 	  type : "POST",    
+	  data : params,  	
+	  // 서버에서 전달될 List 객체를 배열로 변형 : pom.xml 에서 com.fasterxml.jackson.core 설정 필요
+	  success : function(arr) { //arr : 서버에서 List<String> 형태로 리턴하면 클라이언트는 배열형식의 객체로 데이터 수신.
+		  $("select[name="+disname+"] option").remove(); //기존의 option 태그들을 제거
+		  $("select[name="+disname+"]").append(function(){
+			  return "<option value=''>"+toptext+"</option>" //select 태그의 첫번째 option을 설정
+		  })
+		  $.each(arr,function(i,item) {
+			  $("select[name="+disname+"]").append(function(){
+				  return "<option>"+item+"</option>"
+			  })
+		  })
+	  }
+   })				
+}
+function exchangeString() {
+	   $.ajax("${path}/ajax/exchangeString",{
+		   success : function(data) {
+			   console.log(data)
+			   $("#exchange").html(data)
+		   },
+		   error : function(e) {
+			   alert("환율 조회시 서버 오류 발생 :" + e.status)
+		   }
+	   })	
+}
+function exchangeJson() {
+	   $.ajax("${path}/ajax/exchangeJson",{
+		 //json : 자바스크립트객체로 받음. 서버에서 Map 객체로 전달, 클라이언트에서는 JSON객체받음
+		 //     => com.fasterxml.jackson.core 설정이 필요
+		   success : function(json) {  
+//			   console.log(json)
+			   let html = "<h4 class='text-right'>"+json.exdate+"</h4>"
+			   html += "<table class='table table-sm table-bordered'>"
+			   html += "<tr><th>통화</th><th>기준율</th>";
+			   html += "<th class='text-nowrap'>받을실때</th><th class='text-nowrap'>보내실때</th></tr>";
+			   //json.trlist : 서버 List<List<String>> 자료형 => 배열을 배열로 받음
+			   $.each(json.trlist,function(i,tds){ //tds : 배열객체
+				   html += "<tr><td>"+tds[0]+"<br>"+tds[1]+"</td><td>"+tds[4]+"</td>"
+					     + "<td>"+tds[2]+"</td><td>"+tds[3]+"</td></tr>"
+			   })
+			   html += "</table>"
+			   $("#exchange").html(html)
+		   },
+		   error : function(e) {
+			   alert("환율 조회시 서버 오류 발생 :" + e.status)
+		   }
+	   })
+}
 </script>
-</body>
-</html>
+</body></html>

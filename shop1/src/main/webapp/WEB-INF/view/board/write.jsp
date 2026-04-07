@@ -28,21 +28,20 @@
 </table></form:form>
 <script type="text/javascript">
 $(function(){
-	  $("#summernote").summernote({
-		  height:300,
-		  /*callbacks : 이벤트 처리
-		    onImageUpload : 이미지 업로드시 처리
-		    onInit : 에디터 로드시. 초기화면 설정...
-		  */
-		  callbacks : {
-			  onImageUpload : function(images) {
-				  for(let i=0;i < images.length;i++) {
-					  sendFile(images[i])
-				  }
+  $("#summernote").summernote({
+	  height:300,
+	  /*callbacks : 이벤트 처리
+	    onImageUpload : 이미지 업로드시 처리
+	    onInit : 에디터 로드시. 초기화면 설정...
+	  */
+	  callbacks : {
+		  onImageUpload : function(images) {
+			  for(let i=0;i < images.length;i++) {
+				  sendFile(images[i])
 			  }
 		  }
-	  })
+	  }
+  })
 })
 </script>
-
 </body></html>

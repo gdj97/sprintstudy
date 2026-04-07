@@ -1,10 +1,16 @@
 package controller;
 
+import java.util.List;
+import java.util.Map;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import service.ShopService;
 /*
@@ -30,8 +36,33 @@ public class AjaxController {
 	@Autowired
 	private ShopService service;
 	
-	@RequestMapping("select1")
+	@RequestMapping(value="select1", produces="text/plain; charset=utf-8")
+	//produces : 클라이언트에 정보 전달
+	//text/plain : 문서형식. MIME타입. 
+	//charset=utf-8 : 한글 인코딩방식 설정
 	public String sidoSelect1(String si, String gu,HttpServletRequest request) {
-		return service.sidoSelect1(si,gu,request);
+		return service.sidoSelect1(si,gu,request);  //클라이언트로 전달할 문자열 데이터
 	}
+	//리턴타입 : List<String> => 클라이언트에서는 배열로 인식. com.fasterxml.jackson.core 설정필요
+	@RequestMapping("select")
+	public List<String> select(String si, String gu,HttpServletRequest request) {
+		return service.sidoSelect(si,gu,request);  //클라이언트로 전달할 문자열 데이터
+	}
+	
+	@RequestMapping(value="exchangeString", produces="text/html; charset=utf-8")
+	public String exchangeString() {
+//		return "<h3>수출입은행 환율정보 데이터</h3>";			
+		return service.exchangeString();
+	}	
+	@RequestMapping(value="exchangeJson")
+	public Map<String,Object> exchangeJson() {
+		return service.exchangeJson();
+	}	
+	@PostMapping(value="uploadImage",produces="text/plain; charset=utf-8")
+	  public String summernoteImageUpload 
+	    (@RequestParam("image") MultipartFile multipartFile,HttpServletRequest request) {
+		return service.summernoteImageUpload(multipartFile,request);
+	  }
+
+	
 }
