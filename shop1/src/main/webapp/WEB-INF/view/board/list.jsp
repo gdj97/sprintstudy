@@ -61,7 +61,7 @@
       
       <c:if test="${board.grplevel > 0}">
           <c:forEach begin="2" end="${board.grplevel}">&emsp;&emsp;</c:forEach>└</c:if><%-- ㅂ한자 --%>
-      <a href="detail?num=${board.num}">${board.title}</a>
+      <a href="detail?num=${board.num}&countable=true">${board.title}</a>
       </td>
       <td>${board.writer}</td>
       <td>

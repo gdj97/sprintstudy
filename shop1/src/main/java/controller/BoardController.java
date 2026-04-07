@@ -19,7 +19,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 
-import ch.qos.logback.core.recovery.ResilientSyslogOutputStream;
 import dto.Board;
 import dto.Comment;
 import exception.ShopException;
@@ -126,9 +125,12 @@ public class BoardController {
 		return mav;
 	}
 	@GetMapping("detail")
-	public String detail(Integer num,Model model) {
+	public String detail(Integer num,Boolean countable, Model model) {
+		if (countable == null) countable = false;
 		Board board = service.getBoard(num); //num의 게시물 조회
-		service.addReadcnt(num);   //조회수 증가
+		if(countable) {
+			service.addReadcnt(num);   //조회수 증가
+		}
 		model.addAttribute("board",board); 
 		model.addAttribute("comment",new Comment());
 		List<Comment> commlist = service.commentList(num); //num:게시물번호. 게시물번호에 해당하는 댓글목록 조회
@@ -247,9 +249,13 @@ public class BoardController {
 		}
 	}
 	@RequestMapping("comment")  //댓글 등록
-	public String comment(@Valid Comment comm,BindingResult bresult) {
-		String view = "board/detail";
+	public String comment(@Valid Comment comm,BindingResult bresult,Model model) {
+		//model : 뷰에 전달할 데이터 정보들
+		//bresult : @Valid에 의해서 검증된 결과 저장
+		String view = "board/detail"; //board,comment+오류정보,commlist 정보필요
 		if(bresult.hasErrors()) {
+			detail(comm.getNum(),false,model); //board, commlist 정보, 
+			model.addAllAttributes(bresult.getModel()); //getModel() : comment+오류정보
 			return view;   //detail.jsp로 페이지만 이동. board 데이터 없음. 
 		}
 		int seq = service.commmaxseq(comm.getNum());  //댓글번호 최대값
