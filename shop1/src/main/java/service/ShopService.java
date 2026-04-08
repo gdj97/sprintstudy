@@ -23,6 +23,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 @Service
 public class ShopService {
+	
 
 	public String sidoSelect1(String si, String gu, HttpServletRequest request) {
 		BufferedReader fr = null;
@@ -186,5 +187,19 @@ public class ShopService {
 		}
 		return request.getContextPath() + "/board/image/" + filesystemName;	
 	}
-
+	public String goodeelogo() {
+		Document doc = null;
+		String url = "https://gudi.kr/";
+		Elements imgs1 = null;
+		Elements imgs2 = null;
+		try {
+			doc = Jsoup.connect(url).get();
+			imgs1  = doc.select("div.img_box._img_box > a > img "); //img태그들
+			imgs2  = doc.select("#w20241118ccb193cf23d4d > div > div > div > div.front_img._front_img.holder > img "); //img태그들
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		System.out.println(imgs1.get(0).toString() + imgs2.get(0).toString());
+		return imgs1.get(0).toString() + imgs2.get(0).toString();
+	}
 }

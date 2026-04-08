@@ -1,5 +1,7 @@
 package controller;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -12,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import service.BoardService;
 import service.ShopService;
 /*
  * @Controller : @Component + Controller 기능
@@ -35,6 +38,8 @@ import service.ShopService;
 public class AjaxController {
 	@Autowired
 	private ShopService service;
+	@Autowired
+	private BoardService boardService;
 	
 	@RequestMapping(value="select1", produces="text/plain; charset=utf-8")
 	//produces : 클라이언트에 정보 전달
@@ -63,6 +68,21 @@ public class AjaxController {
 	    (@RequestParam("image") MultipartFile multipartFile,HttpServletRequest request) {
 		return service.summernoteImageUpload(multipartFile,request);
 	  }
+	@RequestMapping("goodeelogo")
+	public String goodeelogo() {
+		return service.goodeelogo();	               
+	}
 
-	
+	@RequestMapping("graph1")
+	public List<Map.Entry<String, Integer>> graph1(String boardid) {
+		Map<String,Integer> map = boardService.graph1(boardid);
+		//map : {홍길동:3,111:2,...}
+		List<Map.Entry<String, Integer>> list = new ArrayList<>();
+		for(Map.Entry<String, Integer> m : map.entrySet() ) {
+			list.add(m); // [홍길동:3,111:2]
+		}
+		//m.getValue() 의 내림차순으로 list를 정렬하기
+		Collections.sort(list,(m1,m2)->m2.getValue() - m1.getValue());
+		return list; //[홍길동:3,111:2]
+	}	
 }

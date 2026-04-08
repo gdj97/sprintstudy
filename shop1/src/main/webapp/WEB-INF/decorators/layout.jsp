@@ -126,10 +126,22 @@
       <div style="width:100%">
       	<div id="exchange" style="width:70%; margin:6px;"></div>
       </div>
-
-      <h3>Some Links</h3>
-      <p>Lorem ipsum dolor sit ame.</p>
-      
+	  <hr>
+      <h5>게시판 현황</h5>
+	  <div class="container text-center">
+         <input type="radio" name="pie" onchange="piegraph(2)" checked="checked">자유게시판 &nbsp;&nbsp;
+         <input type="radio" name="pie" onchange="piegraph(3)">QNA &nbsp;&nbsp;
+         <div id="piecontainer" style="width:100%; border:1px solid #ffffff">
+            <canvas id="canvas1" style="width:100%"></canvas>
+         </div>
+      </div>      
+	  <div class="container text-center">
+         <input type="radio" name="pie" onchange="barlinegraph(2)" checked="checked">자유게시판 &nbsp;&nbsp;
+         <input type="radio" name="pie" onchange="barlinegraph(3)">QNA &nbsp;&nbsp;
+         <div id="barcontainer" style="width:100%; border:1px solid #ffffff">
+            <canvas id="canvas2" style="width:100%"></canvas>
+         </div>
+      </div>      
       <hr class="d-sm-none">
     </div>
     <div class="col-sm-8">
@@ -158,12 +170,19 @@
 	   </select>
     </span></div>   
 </div>
+<script type="text/javascript" 
+src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.min.js"></script>
+<script type="text/javascript" src="${path}/js/shop1.js"></script>
 <script>
+
 $(function(){  //화면 준비되면
 	goodeelogo();
 	getSido(); //호이스팅기능: 선언보다 먼저 호출되는 것이 가능
 //	exchangeString();
 	exchangeJson();
+	piegraph(2);   //글쓴이별 게시글등록 건수를 파이그래프로 출력
+    barlinegraph(2) //최근 7일간 게시글 등록 건수를 막대선그래프 출력
+	
 })
 function getSido() { 
 	$.ajax({
@@ -247,5 +266,63 @@ function exchangeJson() {
 		   }
 	   })
 }
+function goodeelogo() {
+	$.ajax("${path}/ajax/goodeelogo",{
+		success : function(data) {
+			console.log(data);
+			$("#goodeelogo").html(data);
+		},
+		error : function(e) {
+			alert("로고 조회 오류:" + e.status);
+		}
+	})
+}
+
+function piegraph(id) {
+    $.ajax("${path}/ajax/graph1?boardid="+id,{
+   	 success : function(json) { // [홍길동:3,111:2]
+   	 	 console.log(json);
+   		 let canvas = "<canvas id='canvas1' style='width:100%'></canvas>" //새로운 canvas 객체 생성 div객체 저장
+   		 $("#piecontainer").html(canvas) 
+   		 pieGraphPrint(json,id)
+   	 },
+   	 error : function(e) {
+   		 alert("서버오류:" +e.status)
+   	 }
+    })	
+}
+function pieGraphPrint(arr,id) { //arr : [{홍길동:3},{111:2}]
+	let colors = []  // 색을 random하게 arr요소의 갯수 생성
+	let writers = [] //x축에 표시할 데이터
+	let datas = []   //파이그래프의 데이터값
+	$.each(arr,function(index){
+		colors[index] = randomColor(0.5) //파이그래프 색 설정
+		for(key in arr[index]) { //arr[index] : {홍길동:3}
+			writers.push(key)  //[홍길동,111]
+			datas.push(arr[index][key]) //[3,2]
+		}
+	})
+	let title = (id == 2)?"자유게시판":"QNA"
+	let config = {
+			type : 'pie',  //파이그래프
+			data : {
+				datasets : [{ data:datas,
+					          backgroundColor : colors}],
+			    labels : writers
+			},
+			options : {
+				responsive : true,
+				legend : {display:true, position:"right"},  //범례
+			    title : {
+			    	display : true,
+			    	text : '글쓴이 별 ' + title + " 등록건수",
+			    	position : 'top'
+			    }
+			}
+	}
+	let ctx = document.getElementById("canvas1")
+	new Chart(ctx,config)
+}
+
 </script>
 </body></html>

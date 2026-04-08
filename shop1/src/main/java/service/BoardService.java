@@ -1,6 +1,8 @@
 package service;
 import java.io.File;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
@@ -101,5 +103,30 @@ public class BoardService {
 
 	public void commendDel(int num, int seq) {
 		commDao.delete(num,seq);
+	}	
+	public Map<String, Integer> graph1(String id) {  //게시판 종류별, 글작성자별 등록 건수
+		List<Map<String,Object>> list = dao.graph1(id);
+		/*
+		 * list :
+		 * [
+		 *    {"writer":"홍길동","cnt":3},
+		 *    {"writer":"111","cnt":2},
+		 *    ...
+		 * ]
+		 *  => 글작성자 : 게시물등록건수
+		 *  {
+		 *     "홍길동":3,
+		 *     "111" : 2,
+		 *     ...
+		 *  }
+		 */
+		Map<String, Integer> map = new HashMap<>();//{홍길동:3,111:2,...}
+		for(Map<String,Object> m : list) {
+			//m : {"writer":"홍길동","cnt":3}
+		    String writer =(String)m.get("writer"); //홍길동
+		    long cnt = (Long) m.get("cnt");         // 갯수. count(*) 로 조회된 컬럼은 long으로 리턴
+		    map.put(writer,(int)cnt);
+		}		
+		return map;
 	}	
 }

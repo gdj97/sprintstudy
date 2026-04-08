@@ -29,7 +29,7 @@ create table useraccount (
    email varchar(50),              -- 이메일
    birthday datetime               -- 생일
 );
-
+alter table useraccount add column channel varchar(100)
 select * from useraccount
 
 CREATE TABLE sale (  -- 주문정보
