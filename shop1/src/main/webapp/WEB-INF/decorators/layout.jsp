@@ -79,6 +79,12 @@
       <li class="nav-item">
         <a class="nav-link" href="${path}/board/list?boardid=3">QNA</a>
       </li>    
+      <li class="nav-item">
+        <a class="nav-link" href="${path}/chat/chat">채팅</a>
+      </li>    
+      <li class="nav-item">
+        <a class="nav-link" href="${path}/chat/chatbot">챗봇</a>
+      </li>    
     </ul>
         
     <ul class="navbar-nav">
@@ -122,22 +128,22 @@
         </li>
       </ul>
       <hr>
-      <h5>수출입 은행 환율정보</h5>
-      <div style="width:100%">
+      <h5 class="text-center">수출입 은행 환율정보</h5>
+      <div style="width:100%" class="text-center">
       	<div id="exchange" style="width:70%; margin:6px;"></div>
       </div>
 	  <hr>
-      <h5>게시판 현황</h5>
-	  <div class="container text-center">
+      <h5 class="text-center">게시판 현황</h5>
+	  <div class="container text-center border">
          <input type="radio" name="pie" onchange="piegraph(2)" checked="checked">자유게시판 &nbsp;&nbsp;
          <input type="radio" name="pie" onchange="piegraph(3)">QNA &nbsp;&nbsp;
          <div id="piecontainer" style="width:100%; border:1px solid #ffffff">
             <canvas id="canvas1" style="width:100%"></canvas>
          </div>
       </div>      
-	  <div class="container text-center">
-         <input type="radio" name="pie" onchange="barlinegraph(2)" checked="checked">자유게시판 &nbsp;&nbsp;
-         <input type="radio" name="pie" onchange="barlinegraph(3)">QNA &nbsp;&nbsp;
+	  <div class="container text-center border">
+         <input type="radio" name="barline" onchange="barlinegraph(2)" checked="checked">자유게시판 &nbsp;&nbsp;
+         <input type="radio" name="barline" onchange="barlinegraph(3)">QNA &nbsp;&nbsp;
          <div id="barcontainer" style="width:100%; border:1px solid #ffffff">
             <canvas id="canvas2" style="width:100%"></canvas>
          </div>
@@ -176,12 +182,12 @@ src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.min.js"></scrip
 <script>
 
 $(function(){  //화면 준비되면
-	goodeelogo();
-	getSido(); //호이스팅기능: 선언보다 먼저 호출되는 것이 가능
+//	goodeelogo();
+//	getSido(); //호이스팅기능: 선언보다 먼저 호출되는 것이 가능
 //	exchangeString();
-	exchangeJson();
-	piegraph(2);   //글쓴이별 게시글등록 건수를 파이그래프로 출력
-    barlinegraph(2) //최근 7일간 게시글 등록 건수를 막대선그래프 출력
+//	exchangeJson();
+//	piegraph(2);   //글쓴이별 게시글등록 건수를 파이그래프로 출력
+//    barlinegraph(2) //최근 7일간 게시글 등록 건수를 막대선그래프 출력
 	
 })
 function getSido() { 
@@ -235,7 +241,6 @@ function getText(name) {
 function exchangeString() {
 	   $.ajax("${path}/ajax/exchangeString",{
 		   success : function(data) {
-			   console.log(data)
 			   $("#exchange").html(data)
 		   },
 		   error : function(e) {
@@ -254,22 +259,27 @@ function exchangeJson() {
 			   html += "<tr><th>통화</th><th>기준율</th>";
 			   html += "<th class='text-nowrap'>받을실때</th><th class='text-nowrap'>보내실때</th></tr>";
 			   //json.trlist : 서버 List<List<String>> 자료형 => 배열을 배열로 받음
-			   $.each(json.trlist,function(i,tds){ //tds : 배열객체
+			   if (json.trlist.length > 0) {
+			   	 $.each(json.trlist,function(i,tds){ //tds : 배열객체
 				   html += "<tr><td>"+tds[0]+"<br>"+tds[1]+"</td><td>"+tds[4]+"</td>"
 					     + "<td>"+tds[2]+"</td><td>"+tds[3]+"</td></tr>"
-			   })
-			   html += "</table>"
-			   $("#exchange").html(html)
+			   	 })
+			   	 html += "</table>"
+			     $("#exchange").html(html)
+			   } else {
+				     $("#exchange").html("환율 정보가 등록되지 않았습니다.")
+			   }
 		   },
 		   error : function(e) {
-			   alert("환율 조회시 서버 오류 발생 :" + e.status)
+			   $("#exchange").html("환율정보 조회시 오류 발생 :" + e.status);
+//			   alert("환율 조회시 서버 오류 발생 :" + e.status)
 		   }
 	   })
 }
 function goodeelogo() {
 	$.ajax("${path}/ajax/goodeelogo",{
 		success : function(data) {
-			console.log(data);
+//			console.log(data);
 			$("#goodeelogo").html(data);
 		},
 		error : function(e) {
@@ -281,7 +291,7 @@ function goodeelogo() {
 function piegraph(id) {
     $.ajax("${path}/ajax/graph1?boardid="+id,{
    	 success : function(json) { // [홍길동:3,111:2]
-   	 	 console.log(json);
+//   	 	 console.log(json);
    		 let canvas = "<canvas id='canvas1' style='width:100%'></canvas>" //새로운 canvas 객체 생성 div객체 저장
    		 $("#piecontainer").html(canvas) 
    		 pieGraphPrint(json,id)
@@ -304,7 +314,7 @@ function pieGraphPrint(arr,id) { //arr : [{홍길동:3},{111:2}]
 	})
 	let title = (id == 2)?"자유게시판":"QNA"
 	let config = {
-			type : 'pie',  //파이그래프
+			type : 'doughnut',  //파이그래프:pie, 도넛그래프:doughnut
 			data : {
 				datasets : [{ data:datas,
 					          backgroundColor : colors}],
@@ -323,6 +333,60 @@ function pieGraphPrint(arr,id) { //arr : [{홍길동:3},{111:2}]
 	let ctx = document.getElementById("canvas1")
 	new Chart(ctx,config)
 }
-
+function barlinegraph(id) { 
+    $.ajax("${path}/ajax/graph2?id="+id,{
+   	 success : function(arr) { // [{2026-04-09:1},...] 
+   		 let canvas = "<canvas id='canvas2' style='width:100%'></canvas>"
+   		 $("#barcontainer").html(canvas) 
+   		 barlineGraphPrint(arr,id) 
+   	 },
+   	 error : function(e) {
+   		 alert("서버오류:" +e.status)
+   	 }
+    })	
+}
+function barlineGraphPrint(arr,id) {
+	let colors = []
+	let regdates = [] 
+	let datas = [] 
+	$.each(arr,function(index){
+		colors[index] = randomColor(0.5)
+		for(key in arr[index]) {
+			regdates.push(key)
+			datas.push(arr[index][key])
+		}
+	})
+	let title = (id == 2)?"자유게시판":"QNA"
+	let config = {
+			type : 'bar',
+			data : {     
+				datasets : [
+				  { type : "line",	borderWidth : 2,   borderColor : colors,
+					label :'건수',	fill : false,  	   data : datas },
+                  {	type : "bar",  backgroundColor : colors,  label :'건수',	data : datas }
+                 ],
+			     labels : regdates,
+			},
+			options : {
+				responsive : true,
+				legend : {display:false},
+			    title : {
+			    	display : true, 	text : '최근 7일 ' + title + " 등록건수",
+			    	position : 'top'
+			    },
+			    scales : {
+			    	xAxes : [{ display : true,
+			    		       scaleLabel : {display : true, labelString : "게시글 작성일자"}
+			    	         }],
+			    	yAxes : [{
+			    		scaleLabel : { display : true, labelString : "게시물 등록 건수"  },
+			    		ticks : {beginAtZero : true}
+			    	  }]
+			    }
+			}
+	}
+	let ctx = document.getElementById("canvas2")
+	new Chart(ctx,config)
+}
 </script>
 </body></html>

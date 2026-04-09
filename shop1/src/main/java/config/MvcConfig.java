@@ -24,7 +24,7 @@ import org.springframework.web.servlet.view.InternalResourceViewResolver;
 import intercepter.BoardIntercepter;
 
 @Configuration
-@ComponentScan(basePackages= {"controller","dto","service","dao","aop"})
+@ComponentScan(basePackages= {"controller","dto","service","dao","aop","websocket"})
 @EnableAspectJAutoProxy //AOP 관련 설정 
 @EnableWebMvc  //기본 제공되는 web처리 기능 유지
 public class MvcConfig implements WebMvcConfigurer{
@@ -94,4 +94,5 @@ public class MvcConfig implements WebMvcConfigurer{
 		.addPathPatterns("/board/update")
 		.addPathPatterns("/board/delete");		
 	}	
+	
 }

@@ -1,5 +1,7 @@
 package controller;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -84,5 +86,23 @@ public class AjaxController {
 		//m.getValue() 의 내림차순으로 list를 정렬하기
 		Collections.sort(list,(m1,m2)->m2.getValue() - m1.getValue());
 		return list; //[홍길동:3,111:2]
+	}	
+	@RequestMapping("graph2")
+	public List<Map.Entry<String, Integer>> graph2(String id) {
+	   Map<String,Integer> map = boardService.graph2(id);
+	   List<Map.Entry<String, Integer>> list =  new ArrayList<>(map.entrySet());
+	   return list;	               
+	}	
+	
+	@PostMapping(value="gptquestion", produces="text/html; charset=utf-8")
+	public String gptquestion (String question) {
+      String gptResponse = null;
+	  try {
+		  //gptResponse : gpt의 응답 메세지
+		  gptResponse = service.getChatGPTResponse(question);
+	  } catch (URISyntaxException | IOException | InterruptedException e) {
+		e.printStackTrace();
+	  }
+	  return gptResponse;
 	}	
 }

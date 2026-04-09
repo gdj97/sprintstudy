@@ -4,6 +4,11 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
@@ -20,6 +25,9 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Service
 public class ShopService {
@@ -201,5 +209,71 @@ public class ShopService {
 		}
 		System.out.println(imgs1.get(0).toString() + imgs2.get(0).toString());
 		return imgs1.get(0).toString() + imgs2.get(0).toString();
+	}
+
+	public String getChatGPTResponse(String question) throws URISyntaxException,IOException,InterruptedException{
+//	    final String API_KEY = "OPEN AI API_KEY";
+		//github에 로드 하지 말것
+		//openai에서 제공하는 key값. 
+	    final String API_KEY ="";
+	    final String ENDPOINT = "https://api.openai.com/v1/chat/completions";  //openai에 요청하는 url
+	    
+        HttpClient client = HttpClient.newHttpClient(); //openai에 요청할 수 있는 객체
+        Map<String, Object> requestBody = new HashMap<>();
+        requestBody.put("model", "gpt-3.5-turbo");  //gpt의 모델 
+        /*  new HashMap(){  => 이름없는 내부객체
+         *   {    }         => 인스턴스 초기화블럭
+         *  }
+         *  
+         *  Map.of("role","system","content","당신은 자바 전문가 입니다.") => 변경 불가 Map 객체 생성
+         *  =>
+         *  new HashMap{{
+         *     put("role","system");
+                put("content", "당신은 자바 전문가 입니다.");
+         *     
+         *  }}
+         */
+        requestBody.put("messages", new Object[] {  //요청 메세지
+            new HashMap<String, String>() {{ //질문 내용
+                put("role", "user");
+                put("content", question);
+            }},
+            Map.of("role","system","content","당신은 자바 전문가 입니다.")
+        });
+        /*
+         * role :
+         *    system : 페르소나(정체성) 설정. 대화의 규칙,맥락 구체화 시킬수 있는 메세지. 대화시작시 한번. 옵션. 생략 가능
+         *    user  : 실제 질문. 필수 데이터
+         */
+        //자바의 객체를 JSON 형식의 문자열로 변환 할 수 있는 객체 생성
+        ObjectMapper objectMapper = new ObjectMapper();
+        //requestBody 객체를 json 형식의 문자열로 변경
+        // requestBodyJson : { "model":"gpt-3.5-turbo","messages":[{"role":"user","content":question 값},] }
+        //   gpt에 전송한 요청 문자열
+        String requestBodyJson=objectMapper.writeValueAsString(requestBody);
+        //HTTP 사용될 요청객체 조립하여 객체 완성
+        HttpRequest request = HttpRequest.newBuilder()
+            .uri(new URI(ENDPOINT)) //openai의 url값. 접속 API의 주소
+            .header("Content-Type", "application/json") //요청 형식은 json 형식임을 명시
+            .header("Authorization", "Bearer " + API_KEY) //인증을 위한 API키 설정
+            .POST(HttpRequest.BodyPublishers.ofString(requestBodyJson)) //POST 방식으로 요청객체에 설정
+            .build();
+        //요청 서버(openai)로 전송
+        //HttpResponse.BodyHandlers.ofString() : 응답은 json형태로 처리하도록 설정. 응답이 올때 까지 대기함
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        //응답 결과코드 : 200 => 정상처리. gpt의 응답 성공
+        if (response.statusCode() == 200) {
+        	//objectMapper.readValue(문자열,타입) : 문자열을 Map 객체로 생성
+        	//responseBody : 응답 데이터를 Map 객체로 저장
+        	Map<String, Object> responseBody = 
+        			objectMapper.readValue(response.body(), new TypeReference<Map<String, Object>>() {});
+        	//key가 choices인 객체 리턴. 
+            List<Map<String, Object>> choices = (List<Map<String, Object>>)responseBody.get("choices");
+            Map<String, Object> firstChoice = choices.get(0);
+            Map<String, String> message = (Map<String, String>)firstChoice.get("message");
+            return message.get("content"); //gpt가 전송한 응답 메세지 
+        } else {  //gpt 응답시 오류 발생
+            throw new RuntimeException("API 요청 실패: " + response.body());
+        }
 	}
 }

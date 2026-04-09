@@ -1,8 +1,10 @@
 package service;
 import java.io.File;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
@@ -128,5 +130,17 @@ public class BoardService {
 		    map.put(writer,(int)cnt);
 		}		
 		return map;
-	}	
+	}
+
+	public Map<String, Integer> graph2(String id) {
+			List<Map<String,Object>> list = dao.graph2(id);
+			//TreeMap : 키순으로 정렬. Comparator.reverseOrder() : 기본정렬방식의 역순정렬
+			Map<String,Integer> map = new TreeMap<>(Comparator.reverseOrder()); //날짜의 역순으로 정렬. 최근날짜부터
+			for(Map<String,Object> m : list) { 
+				String day =(String)m.get("day");
+				long cnt = (long)m.get("cnt"); 
+				map.put(day,(int)cnt);
+			}
+			return map;
+		}
 }
