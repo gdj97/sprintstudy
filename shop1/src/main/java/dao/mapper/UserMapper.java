@@ -13,8 +13,10 @@ import dto.User;
 
 public interface UserMapper {
 
-	@Insert("insert into useraccount (userid, username,password,phoneno,postcode,address,email,birthday)"
-	+ " values(#{userid}, #{username},#{password},#{phoneno},#{postcode},#{address},#{email},#{birthday})")
+	@Insert("insert into useraccount "
+	+ "(userid, username,password,phoneno,postcode,address,email,birthday,channel)"
+	+ " values(#{userid}, #{username},#{password},#{phoneno},#{postcode},#{address},"
+	+ " #{email},#{birthday},#{channel})")
 	void insert(User user);
 
 	@Select("select * from useraccount where userid=#{value}")

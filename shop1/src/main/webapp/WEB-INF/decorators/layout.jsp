@@ -85,6 +85,9 @@
       <li class="nav-item">
         <a class="nav-link" href="${path}/chat/chatbot">챗봇</a>
       </li>    
+      <li class="nav-item">
+        <a class="nav-link" href="${path}/chat/naversearch">네이버검색</a>
+      </li>    
     </ul>
         
     <ul class="navbar-nav">

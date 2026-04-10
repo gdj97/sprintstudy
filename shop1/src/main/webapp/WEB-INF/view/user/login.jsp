@@ -25,6 +25,8 @@
 <button type="button" onclick="win_open('idsearch')" class="btn btn-secondary">아이디찾기</button>
 <button type="button" onclick="win_open('pwsearch')" class="btn btn-secondary">비밀번호찾기</button>
 </td></tr></table>
+<p>
+<a href="${apiURL}"><img height="30" src="http://static.nid.naver.com/oauth/small_g_in.PNG"></a>
 </form:form>
 <script type="text/javascript">
 function win_open(page) {

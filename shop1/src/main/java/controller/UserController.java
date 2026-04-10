@@ -1,9 +1,16 @@
 package controller;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
+import java.math.BigInteger;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLEncoder;
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -24,6 +31,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Controller;
@@ -60,6 +70,153 @@ public class UserController {
 		mav.addObject(new User());
 		return mav;//view: null => url과 같은 위치의 jsp 페이지 요청
 	}
+	/*
+	 * OAuth2 이용 
+	 *  1. 로그인 요청  
+	 *  2. 인증코드발급 : redirectURL을 통해서
+	 *  3. 로그인 재요청 : 토큰 발급
+	 */
+	@GetMapping("login") 
+	public ModelAndView loginForm(HttpSession session) {
+		ModelAndView mav = new ModelAndView();
+		String clientId="rGh0ITfXNHwLoTbWBKSN";
+		String redirectURL = null;
+		try {
+			//네이버에 Callback URL 전달
+			redirectURL = URLEncoder.encode("http://localhost:8080/shop1/user/naverlogin","UTF-8");
+		} catch(UnsupportedEncodingException e) {
+			e.printStackTrace();
+		}
+		SecureRandom random = new SecureRandom(); //안전한 코드 생성
+		//큰 랜덤숫자를 생성 : 요청시 전달하고, 네이버응답시 state 값을 비교
+		String state = new BigInteger(130,random).toString();
+		//네이버에 로그인 요청 url : 네이버 결정
+		String apiURL = "https://nid.naver.com/oauth2.0/authorize?response_type=code";
+		apiURL += "&client_id="+clientId;  //사용자정보
+		apiURL += "&redirect_uri="+redirectURL; //네이버가 다시 요청할 url
+		apiURL += "&state="+state;         //임의의 상태 코드
+		mav.addObject("apiURL",apiURL);//네이버 로그인 접근
+		mav.addObject(new User());     //입력값 검증
+		session.setAttribute("state", state); //세션에 임의의 상태 코드 등록
+		System.out.println("1.session.id="+session.getId());
+		return mav;
+	}
+	// 네이버에서 Callback url로 호출됨
+	/*
+	 * code : 네이버에서 전달받은 인증 코드(접근 가능 토큰발급용)
+	 * state : callback url 요청시 전달한 상태 코드
+	 */
+	@RequestMapping("naverlogin")
+	public String naverlogin(String code, String state, HttpSession session) {
+		System.out.println("2.session.id="+session.getId());
+		String clientId = ""; //네이버 개발자센터의 Client ID값
+		String clientSecret = "";       //네이버 개발자센터의 Client Secret값
+		String redirectURI=null;
+		try {
+			redirectURI = URLEncoder.encode("YOUR_CALLBACK_URL", "UTF-8");
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		}
+		//로그인 접근 토큰 요청을 위한  url 생성
+		//Access Token 발급을 위한 URL
+		String apiURL;
+		apiURL = "https://nid.naver.com/oauth2.0/token?grant_type=authorization_code";
+		apiURL += "&client_id=" + clientId;
+		apiURL += "&client_secret=" + clientSecret;
+		apiURL += "&redirect_uri=" + redirectURI;
+		apiURL += "&code=" + code;  //네이버 생성 코드값
+		apiURL += "&state=" + state; //요청시 생성한 상태코드값
+		System.out.println("code="+code+",state="+state);
+		StringBuffer res = new StringBuffer();
+		System.out.println("apiURL="+apiURL);
+		try {
+			/*
+			 * URL : apiURL이 정상인지 판단가능
+			 */
+		      URL url = new URL(apiURL); 
+		      HttpURLConnection con = (HttpURLConnection)url.openConnection(); //url 연결. 네이버에 접속
+		      con.setRequestMethod("GET");
+		      int responseCode = con.getResponseCode(); //응답 코드 제공
+		      BufferedReader br;
+		      System.out.print("responseCode="+responseCode);
+		      if(responseCode==200) { // 정상처리 완료 : 토큰 생성
+		    	  //con.getInputStream() : 네이버에서 전달한 내용 읽기 위한 입력 스트림
+		        br = new BufferedReader(new InputStreamReader(con.getInputStream()));
+		      } else {    //토큰 생성 실패
+		    	  //con.getErrorStream() : 네이버에서 전달한 오류 내용을 읽기 위한 입력 스트림
+		        br = new BufferedReader(new InputStreamReader(con.getErrorStream()));
+		      }
+		      String inputLine;
+		      while ((inputLine = br.readLine()) != null) {
+		        res.append(inputLine);
+		      }
+		      //res : 네이버에서 제공한 정상메세지 또는 오류 메세지를 저장 StringBuffer 객체
+		      br.close();
+		      if(responseCode==200) {
+		        System.out.println("res:" + res.toString());
+		      }
+		 } catch (Exception e) {
+		      e.printStackTrace();
+		 }
+		//JSON 형식의 응답데이터에서 access token 추출하기 
+		 JSONParser parser = new JSONParser();  //json-simple-1.1.1.jar 파일 설정 
+		 JSONObject json=null;  //자바에서 사용할 수 있는 JSON 객체
+		 try {
+			json = (JSONObject)parser.parse(res.toString());
+		 } catch (ParseException e) {
+			e.printStackTrace();
+		 }
+		 //access-token을 이용하여 네이버에 로그인 하기
+		 String token = (String)json.get("access_token");
+		 String header = "Bearer " + token;  //로그인 권한 설정
+		 try {
+		    apiURL = "https://openapi.naver.com/v1/nid/me";  //로그인 url 
+		    URL url = new URL(apiURL);
+		    HttpURLConnection con = (HttpURLConnection)url.openConnection();
+		    con.setRequestMethod("GET");
+		    con.setRequestProperty("Authorization", header);
+		    int responseCode = con.getResponseCode();
+		    BufferedReader br;
+		    res = new StringBuffer();  //정상 :로그인 사용자의 정보 저장, 오류발생:오류메세지
+		    if(responseCode==200) {
+		        br = new BufferedReader(new InputStreamReader(con.getInputStream()));
+		    } else {
+		        br = new BufferedReader(new InputStreamReader(con.getErrorStream()));
+		    }
+		    String inputLine;
+		    while ((inputLine = br.readLine()) != null) {
+		        res.append(inputLine);
+		    }
+		    br.close();
+		    System.out.println(res.toString());
+		 } catch (Exception e) {
+			 e.printStackTrace();
+		 }
+		 try {
+			json = (JSONObject)parser.parse(res.toString());
+		 } catch (ParseException e) {
+			e.printStackTrace();
+		 }
+		 JSONObject jsondetail = (JSONObject)json.get("response");
+		 System.out.println(jsondetail);
+		 System.out.println(jsondetail.get("id"));
+		 System.out.println(jsondetail.get("name"));
+		 System.out.println(jsondetail.get("email"));
+		 String userid = jsondetail.get("id").toString();
+		 User user = service.getUser(userid);
+		 if (user == null) { //첫번째 로그인 한경우 => useraccount 테이블에 저장. 회원가입
+			 user = new User();
+			 user.setUserid(userid);
+			 user.setUsername(jsondetail.get("name").toString());
+			 String email = jsondetail.get("email").toString();
+			 user.setEmail(email);
+			 user.setChannel("naver");
+			 service.userInsert(user);
+		 }
+		 session.setAttribute("loginUser", user);
+		 return "redirect:mypage?userid="+user.getUserid();
+	}
+	
 	@PostMapping("join")
 	public ModelAndView join(@Valid User user,BindingResult bresult) {
 		ModelAndView mav = new ModelAndView();
